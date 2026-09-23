@@ -60,10 +60,11 @@ final class ReplyPanel {
         set(views)
     }
 
-    /// Separate non-wrapping mood chips with ≥16pt gaps — never one clutched string.
+    /// Separate non-wrapping mood chips with ≥16pt visual gaps — never one clutched string.
+    /// Spacing is 24pt so NSTextField alignment insets still leave ≥16pt between glyphs.
     private func moodRow(_ parts: [String]) -> NSView {
         let chips = (["Mood:"] + parts).map { plainLabel($0, bold: true) }
-        return MoodStrip(labels: chips, spacing: 16)
+        return MoodStrip(labels: chips, spacing: 24)
     }
 
     private func replyRow(_ r: RankedReply) -> NSView {
