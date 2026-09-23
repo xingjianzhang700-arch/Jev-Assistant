@@ -1,0 +1,10 @@
+{"role": "AXWindow", "x": 0, "y": 0, "w": 1000, "h": 1000, "children": [
+  {"role": "AXStaticText", "value": "Alex", "x": 400, "y": 40, "w": 80, "h": 24},
+  {"role": "AXGroup", "desc": "message-in", "x": 300, "y": 120, "w": 700, "h": 40, "children": [
+    {"role": "AXStaticText", "value": "are we still on for tonight?", "x": 320, "y": 120, "w": 280, "h": 36}]},
+  {"role": "AXGroup", "desc": "message-out", "x": 300, "y": 170, "w": 700, "h": 40, "children": [
+    {"role": "AXStaticText", "value": "yes! 7pm?", "x": 720, "y": 170, "w": 200, "h": 36}]},
+  {"role": "AXGroup", "desc": "message-in", "x": 300, "y": 220, "w": 700, "h": 40, "children": [
+    {"role": "AXStaticText", "value": "perfect, see you there", "x": 320, "y": 220, "w": 260, "h": 36}]},
+  {"role": "AXTextArea", "editable": true, "x": 340, "y": 900, "w": 600, "h": 30}
+]}

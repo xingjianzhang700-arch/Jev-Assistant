@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<hierarchy rotation="0">
+  <node index="0" text="" resource-id="" class="android.widget.FrameLayout" package="com.snapchat.android" content-desc="" bounds="[0,0][1080,2400]">
+    <node index="0" text="Alex" resource-id="com.snapchat.android:id/chat_title" class="android.widget.TextView" package="com.snapchat.android" content-desc="" bounds="[220,110][460,170]" />
+    <node index="1" text="are we still on for tonight?" resource-id="com.snapchat.android:id/chat_message_text" class="android.widget.TextView" package="com.snapchat.android" content-desc="" bounds="[140,400][760,470]" />
+    <node index="2" text="" resource-id="com.snapchat.android:id/chat_message_text" class="android.view.View" package="com.snapchat.android" content-desc="yes! 7pm?" bounds="[780,520][1040,590]" />
+    <node index="3" text="perfect, see you there" resource-id="com.snapchat.android:id/chat_message_text" class="android.widget.TextView" package="com.snapchat.android" content-desc="" bounds="[140,640][700,710]" />
+    <node index="4" text="" resource-id="com.snapchat.android:id/chat_input_text_field" class="android.widget.EditText" package="com.snapchat.android" content-desc="" bounds="[160,2250][860,2330]" />
+  </node>
+</hierarchy>

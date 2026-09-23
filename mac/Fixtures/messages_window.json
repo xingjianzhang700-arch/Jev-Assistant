@@ -1,0 +1,15 @@
+{"role": "AXWindow", "x": 0, "y": 0, "w": 1000, "h": 1000, "children": [
+  {"role": "AXTextField", "subrole": "AXSearchField", "editable": true, "x": 10, "y": 50, "w": 280, "h": 24},
+  {"role": "AXScrollArea", "x": 0, "y": 80, "w": 300, "h": 920, "children": [
+    {"role": "AXStaticText", "value": "Sam", "x": 60, "y": 100, "w": 100, "h": 20},
+    {"role": "AXStaticText", "value": "see you at 7", "x": 60, "y": 122, "w": 200, "h": 18}]},
+  {"role": "AXStaticText", "value": "Sam", "x": 600, "y": 60, "w": 60, "h": 20},
+  {"role": "AXScrollArea", "x": 300, "y": 100, "w": 700, "h": 780, "children": [
+    {"role": "AXGroup", "x": 300, "y": 120, "w": 700, "h": 40, "children": [
+      {"role": "AXTextArea", "value": "are we still on for 7?", "x": 320, "y": 120, "w": 250, "h": 36}]},
+    {"role": "AXGroup", "x": 300, "y": 170, "w": 700, "h": 40, "children": [
+      {"role": "AXTextArea", "value": "yes, see you there", "x": 750, "y": 170, "w": 230, "h": 36}]},
+    {"role": "AXGroup", "x": 300, "y": 220, "w": 700, "h": 40, "children": [
+      {"role": "AXTextArea", "value": "see you at 7", "x": 320, "y": 220, "w": 200, "h": 36}]}]},
+  {"role": "AXTextArea", "editable": true, "x": 340, "y": 900, "w": 600, "h": 30}
+]}

@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<hierarchy rotation="0">
+  <node index="0" text="" resource-id="" class="android.widget.FrameLayout" package="x" content-desc="" bounds="[0,0][1080,2400]">
+    <node index="0" text="Sam" resource-id="x:id/title" class="android.widget.TextView" package="x" content-desc="" bounds="[200,90][420,150]" />
+    <node index="1" text="hey" resource-id="x:id/body" class="android.widget.TextView" package="x" content-desc="" bounds="[150,400][300,460]" />
+    <node index="2" text="hi there" resource-id="x:id/body" class="android.widget.TextView" package="x" content-desc="" bounds="[800,500][1040,560]" />
+    <node index="3" text="" resource-id="x:id/input" class="android.widget.EditText" package="x" content-desc="" bounds="[40,2200][900,2300]" />
+  </node>
+</hierarchy>

@@ -1,0 +1,15 @@
+{"role": "AXWindow", "x": 0, "y": 0, "w": 1800, "h": 1130, "children": [
+  {"role": "AXButton", "identifier": "ConversationTitle", "value": "Sam", "x": 400, "y": 80, "w": 60, "h": 28},
+  {"role": "AXTextField", "subrole": "AXSearchField", "editable": true, "x": 10, "y": 100, "w": 300, "h": 36},
+  {"role": "AXGroup", "identifier": "TranscriptCollectionView", "x": 0, "y": 40, "w": 1800, "h": 1000, "children": [
+    {"role": "AXGroup", "identifier": "Sticker", "x": 40, "y": 120, "w": 280, "h": 35, "children": [
+      {"role": "AXTextArea", "identifier": "CKBalloonTextView", "editable": true, "value": "are we still on for 7?", "x": 50, "y": 120, "w": 250, "h": 30}]},
+    {"role": "AXGroup", "identifier": "Sticker", "x": 1500, "y": 170, "w": 250, "h": 35, "children": [
+      {"role": "AXTextArea", "identifier": "CKBalloonTextView", "editable": true, "value": "yes, see you there", "x": 1510, "y": 170, "w": 230, "h": 30}]},
+    {"role": "AXGroup", "identifier": "Sticker", "x": 40, "y": 220, "w": 220, "h": 35, "children": [
+      {"role": "AXTextArea", "identifier": "CKBalloonTextView", "editable": true, "value": "see you at 7", "x": 50, "y": 220, "w": 200, "h": 30}]}
+  ]},
+  {"role": "AXGroup", "identifier": "MessageEntryView", "x": 40, "y": 1080, "w": 1472, "h": 42, "children": [
+    {"role": "AXTextField", "identifier": "messageBodyField", "editable": true, "x": 50, "y": 1080, "w": 1328, "h": 31}
+  ]}
+]}

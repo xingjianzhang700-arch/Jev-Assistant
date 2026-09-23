@@ -1,0 +1,25 @@
+{
+  "manifest_version": 3,
+  "name": "Jev Assistant",
+  "version": "1.4.0",
+  "description": "Reads the open WhatsApp, Snapchat, Instagram, or Google Messages chat and suggests replies. Never sends.",
+  "minimum_chrome_version": "116",
+  "browser_specific_settings": {
+    "gecko": { "id": "jev-assistant@local", "strict_min_version": "121.0" }
+  },
+  "permissions": ["storage", "sidePanel"],
+  "host_permissions": ["https://openrouter.ai/*"],
+  "optional_host_permissions": ["https://*/*"],
+  "background": { "service_worker": "background.js", "type": "module" },
+  "side_panel": { "default_path": "panel.html" },
+  "sidebar_action": { "default_title": "Jev Assistant", "default_panel": "panel.html" },
+  "action": { "default_title": "Jev Assistant" },
+  "options_page": "options.html",
+  "content_scripts": [
+    { "matches": ["https://www.instagram.com/*", "https://instagram.com/*", "https://messages.google.com/*", "https://web.whatsapp.com/*", "https://web.snapchat.com/*"], "js": ["content.js"] }
+  ],
+  "web_accessible_resources": [
+    { "resources": ["lib/*.js", "sites/*.js"],
+      "matches": ["https://www.instagram.com/*", "https://instagram.com/*", "https://messages.google.com/*", "https://web.whatsapp.com/*", "https://web.snapchat.com/*"] }
+  ]
+}

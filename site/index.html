@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en" data-theme-init>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jev Chat Assistant — A conversation copilot in any chat</title>
+<meta name="description" content="Jev Chat Assistant is an open-source conversation copilot for Android / Windows / macOS: it reads the other person's latest message, judges intent and risk level, drafts three candidate replies, and fills one into the input box in one tap. It only fills, never sends — sending is up to you. Working end to end on WeChat / QQ / X / Feishu / Instagram / Messages.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://chatjevs.com/">
+<meta property="og:title" content="Jev Chat Assistant — A conversation copilot in any chat">
+<meta property="og:description" content="Reads the other person, three replies, fills in one tap. Open source, MIT license, Android / Windows / macOS. It only fills, never sends.">
+<meta property="og:image" content="https://chatjevs.com/assets/og.png">
+<meta property="og:site_name" content="Jev Chat Assistant">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Jev Chat Assistant — A conversation copilot in any chat">
+<meta name="twitter:description" content="Reads the other person, three replies, fills in one tap. Open source, MIT license, Android / Windows / macOS.">
+<meta name="twitter:image" content="https://chatjevs.com/assets/og.png">
+<script>
+  window.JEV = {
+    version: "1.3",
+    apkUrl: "https://github.com/jev-chat/jev-chat-jarvis/raw/main/apk/jev-assistant-v1.3-release.apk",
+    repo: "https://github.com/jev-chat/jev-chat-jarvis"
+  };
+  // Apply the theme early to avoid a white flash on first paint
+  (function () {
+    try {
+      var t = localStorage.getItem("jev-theme");
+      if (t === "dark" || t === "light") document.documentElement.setAttribute("data-theme", t);
+    } catch (e) {}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap"></noscript>
+<link rel="stylesheet" href="style.css?v=20260922b">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="nav" id="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top" aria-label="Jev Chat Assistant home">
+      <img src="assets/favicon.svg" alt="" width="30" height="30" class="brand-mark">
+      <span class="brand-name">Jev Chat Assistant</span>
+    </a>
+
+    <nav class="nav-menu" id="navMenu" aria-label="Main navigation">
+      <a href="#features">Features</a>
+      <a href="#platforms">Platforms</a>
+      <a href="#start">Quick start</a>
+      <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+
+    <div class="nav-actions">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Toggle light/dark theme" title="Toggle theme">
+        <svg class="ico-sun" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="4.2" fill="currentColor"/><g stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M12 2.6v2.4M12 19v2.4M2.6 12h2.4M19 12h2.4M5.3 5.3l1.7 1.7M17 17l1.7 1.7M18.7 5.3L17 7M7 17l-1.7 1.7"/></g></svg>
+        <svg class="ico-moon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M20 14.4A8.6 8.6 0 1 1 9.6 4a7 7 0 0 0 10.4 10.4z" fill="currentColor"/></svg>
+      </button>
+      <a class="nav-star" data-jev-repo href="#" target="_blank" rel="noopener" aria-label="GitHub repo — give it a star" title="Star it if you find it useful"><svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg><span class="nav-star-text">Star</span><b data-jev-stars>1.3k</b></a>
+      <a class="btn btn-primary btn-sm nav-cta" data-jev-apk href="#">Download for Android</a>
+      <button class="icon-btn burger" id="burger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navMenu">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><g stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3.5 7h17M3.5 12h17M3.5 17h17"/></g></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ===================== HERO ===================== -->
+<section class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow reveal">Open source · MIT · Android / Windows / macOS</span>
+      <h1 class="hero-title reveal">A copilot,<br>in every chat</h1>
+      <p class="hero-sub reveal">Reads the other person, three replies, fills in one tap. WeChat / QQ / X / Feishu / Instagram / Messages all working end to end, with Windows / macOS desktop versions too.</p>
+
+      <div class="cmd reveal" role="group" aria-label="Install command">
+        <code id="cmdText">adb install -r jev-assistant-v<span data-jev-version>1.2</span>-release.apk</code>
+        <button class="cmd-copy" id="copyBtn" type="button" aria-label="Copy command">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M15 5.5H6.5A2.5 2.5 0 0 0 4 8v8.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <span class="cmd-copy-label">Copy</span>
+        </button>
+      </div>
+
+      <div class="hero-btns reveal">
+        <a class="btn btn-primary" data-jev-apk href="#">Download APK v<span data-jev-version>1.2</span></a>
+        <a class="btn btn-ghost" href="https://github.com/jev-chat/jev-chat-windows/releases" target="_blank" rel="noopener">Windows v0.1.6</a>
+        <a class="btn btn-ghost" href="https://github.com/jev-chat/jev-chat-jarvis-mac/releases" target="_blank" rel="noopener">macOS v0.3.0</a>
+        <a class="btn btn-star" data-jev-repo href="#" target="_blank" rel="noopener" title="Star it on GitHub"><svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg><span>GitHub</span><span class="star-count" aria-label="Star count"><span aria-hidden="true">★</span> <b data-jev-stars>1.3k</b></span></a>
+      </div>
+
+      <p class="star-callout reveal"><a data-jev-repo href="#" target="_blank" rel="noopener"><span class="star-callout-ico" aria-hidden="true">⭐</span>If it's useful, star it on GitHub<span class="star-callout-arrow" aria-hidden="true">→</span></a></p>
+
+      <p class="hero-note reveal">It only fills the reply into the input box — never sends automatically, and never touches transfers, red packets, or receiving payments.</p>
+    </div>
+
+    <div class="hero-visual reveal">
+      <div class="pipeline" aria-hidden="true">
+        <div class="pl-step pl-1"><span class="pl-dot"></span>Message received</div>
+        <div class="pl-step pl-2"><span class="pl-dot"></span>Jev judges intent · risk level</div>
+        <div class="pl-step pl-3"><span class="pl-dot"></span>Drafts 3 candidates</div>
+        <div class="pl-step pl-4"><span class="pl-dot"></span>One tap into the input box</div>
+        <div class="pl-line"><i></i></div>
+      </div>
+
+      <div class="phone">
+        <div class="phone-frame">
+          <div class="phone-notch"></div>
+          <img src="assets/overlay.webp" alt="Jev Chat Assistant overlay screenshot: showing intent judgment and three candidate replies" width="900" height="2002" loading="eager" decoding="async">
+        </div>
+        <div class="phone-glow" aria-hidden="true"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== MARQUEE ===================== -->
+<section class="marquee-sec">
+  <div class="wrap"><p class="marquee-title">Already working in these apps</p></div>
+  <div class="marquee" aria-label="Supported apps: WeChat, QQ, X (Twitter), Feishu, Instagram, Messages, any app, web planned">
+    <div class="marquee-track">
+      <span class="chip">WeChat</span><span class="chip">QQ</span><span class="chip">X (Twitter)</span><span class="chip">Feishu (OCR)</span><span class="chip">Instagram</span><span class="chip">Messages (SMS)</span><span class="chip">Any app (manual OCR)</span><span class="chip">Web (planned)</span>
+      <span class="chip">WeChat</span><span class="chip">QQ</span><span class="chip">X (Twitter)</span><span class="chip">Feishu (OCR)</span><span class="chip">Instagram</span><span class="chip">Messages (SMS)</span><span class="chip">Any app (manual OCR)</span><span class="chip">Web (planned)</span>
+      <span class="chip">WeChat</span><span class="chip">QQ</span><span class="chip">X (Twitter)</span><span class="chip">Feishu (OCR)</span><span class="chip">Instagram</span><span class="chip">Messages (SMS)</span><span class="chip">Any app (manual OCR)</span><span class="chip">Web (planned)</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== VALUE ===================== -->
+<section class="sec" id="value">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 class="reveal">Understand first. Write second.</h2>
+      <p class="sec-lead reveal">Most assistants just hand you a message. Jev first judges what this message really is, then decides how to reply.</p>
+    </div>
+
+    <div class="grid grid-3">
+      <article class="card reveal">
+        <span class="card-ico">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 4.5c4.4 0 7.8 3.4 9 7.5-1.2 4.1-4.6 7.5-9 7.5S4.2 16.1 3 12c1.2-4.1 4.6-7.5 9-7.5z" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="12" r="2.8" fill="currentColor"/></svg>
+        </span>
+        <h3>Judge</h3>
+        <p>TypeSafe's Jev judgment model gives you, in one pass: the other person's real intent, a risk level from 1–9, what they need, whether to reply right now, and the best action. About 1 second, with a confidence score.</p>
+      </article>
+
+      <article class="card reveal">
+        <span class="card-ico">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="3.5" y="5" width="17" height="4.4" rx="2.2" fill="currentColor"/><rect x="3.5" y="11" width="13" height="4.4" rx="2.2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="3.5" y="17" width="9" height="3" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+        </span>
+        <h3>Candidates</h3>
+        <p>The generation model (DeepSeek by default) drafts 3 natural-sounding replies, then Jev re-ranks them by "best fit" and gives each a share, so there's a reason behind whichever comes first.</p>
+      </article>
+
+      <article class="card reveal">
+        <span class="card-ico">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3.5v11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M8 11l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="4" y="17.5" width="16" height="3.2" rx="1.6" fill="currentColor"/></svg>
+        </span>
+        <h3>Fill</h3>
+        <p>One tap and the reply lands in the input box. It only fills, never sends automatically, and never touches transfers, red packets, or receiving payments. That last tap is always yours.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== COMPARE ===================== -->
+<section class="sec sec-alt" id="compare">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 class="reveal">Jev Chat Assistant vs. other approaches</h2>
+      <p class="sec-lead reveal">Everyone claims to "help you reply" — the difference is how much they can read, whether they judge before writing, and who taps send.</p>
+    </div>
+
+    <div class="table-scroll reveal">
+      <table class="cmp">
+        <thead>
+          <tr>
+            <th scope="col" class="cmp-row-head">Capability</th>
+            <th scope="col" class="cmp-us">Jev Chat Assistant</th>
+            <th scope="col">Keyboard / built-in app AI replies</th>
+            <th scope="col">General chatbots (copy-paste)</th>
+            <th scope="col">Auto-reply bots</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row">Judges before writing</th>
+            <td class="cmp-us"><span class="mk yes">✓</span></td>
+            <td><span class="mk no">✗</span></td>
+            <td><span class="mk part">Partial</span></td>
+            <td><span class="mk no">✗</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Reads any chat app</th>
+            <td class="cmp-us"><span class="mk yes">✓</span></td>
+            <td><span class="mk part">Partial</span></td>
+            <td><span class="mk no">✗</span></td>
+            <td><span class="mk part">Partial</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Non-invasive, doesn't modify the client</th>
+            <td class="cmp-us"><span class="mk yes">✓</span></td>
+            <td><span class="mk yes">✓</span></td>
+            <td><span class="mk yes">✓</span></td>
+            <td><span class="mk no">✗</span></td>
+          </tr>
+          <tr>
+            <th scope="row">You tap send</th>
+            <td class="cmp-us"><span class="mk yes">✓</span></td>
+            <td><span class="mk yes">✓</span></td>
+            <td><span class="mk yes">✓</span></td>
+            <td><span class="mk no">✗</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Knowledge base + contact context</th>
+            <td class="cmp-us"><span class="mk yes">✓</span></td>
+            <td><span class="mk no">✗</span></td>
+            <td><span class="mk part">Partial</span></td>
+            <td><span class="mk part">Partial</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Choose your own endpoint / model</th>
+            <td class="cmp-us"><span class="mk yes">✓</span></td>
+            <td><span class="mk no">✗</span></td>
+            <td><span class="mk no">✗</span></td>
+            <td><span class="mk part">Partial</span></td>
+          </tr>
+          <tr>
+            <th scope="row">Open source and free</th>
+            <td class="cmp-us"><span class="mk yes">✓</span></td>
+            <td><span class="mk no">✗</span></td>
+            <td><span class="mk no">✗</span></td>
+            <td><span class="mk part">Partial</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="cmp-foot reveal">Comparisons are based on commonly available public offerings in general, not any specific product.</p>
+  </div>
+</section>
+
+<!-- ===================== FEATURES ===================== -->
+<section class="sec" id="features">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 class="reveal">One app, six things done right</h2>
+      <p class="sec-lead reveal">Built for everyday chats — not a demo.</p>
+    </div>
+
+    <div class="grid grid-3">
+      <article class="card reveal">
+        <span class="card-ico">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="3" fill="currentColor"/><circle cx="5" cy="6" r="2.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="19" cy="6" r="2.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="5" cy="18" r="2.2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="19" cy="18" r="2.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M7 7l3 3M17 7l-3 3M7 17l3-3M17 17l-3-3" stroke="currentColor" stroke-width="1.5"/></svg>
+        </span>
+        <h3>One core, many platforms</h3>
+        <p>Judging, drafting, ranking, and filling all run on the same core. Adding a new app only takes a few dozen lines in one adapter — everything else is shared.</p>
+      </article>
+
+      <article class="card reveal">
+        <span class="card-ico">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3l7.5 3v5.6c0 4.3-3 8-7.5 9.4C7.5 19.6 4.5 15.9 4.5 11.6V6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8.8 12l2.3 2.3 4.1-4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        <h3>Non-invasive</h3>
+        <p>It doesn't modify any app's package, doesn't go through their APIs or accounts, and doesn't read their databases. It only uses the system accessibility service to read "the conversation currently on screen."</p>
+      </article>
+
+      <article class="card reveal">
+        <span class="card-ico">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 5.5A1.5 1.5 0 0 1 6.5 4H18v16H6.5A1.5 1.5 0 0 1 5 18.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M9 8.5h6M9 12h6M9 15.5h3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </span>
+        <h3>Knowledge base and linked context</h3>
+        <p>Notes and contact profiles (relationship, aliases, notes) are kept locally. Matching knowledge and that person's chat history are pulled in automatically during analysis, so candidate replies stay consistent with what you've recorded. Contacts can be linked across apps.</p>
+      </article>
+
+      <article class="card reveal">
+        <span class="card-ico">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 12h17" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8.7" r="1.1" fill="currentColor"/><path d="M7.5 15.3h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </span>
+        <h3>Can't read it? OCR it</h3>
+        <p>When the message body isn't in the node tree, it automatically takes a screenshot and reads it with ML Kit's offline Chinese OCR — no image is uploaded and no Google service is required. Any app can also trigger "Read screen once (OCR)" manually from the overlay menu.</p>
+      </article>
+
+      <article class="card reveal">
+        <span class="card-ico">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 7.5h14M5 12h14M5 16.5h14" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><circle cx="9" cy="7.5" r="2.1" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="15" cy="12" r="2.1" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="10" cy="16.5" r="2.1" fill="none" stroke="currentColor" stroke-width="1.7"/></svg>
+        </span>
+        <h3>Every endpoint is configurable</h3>
+        <p>The Judge / Reply / Vision endpoints each have their own URL, key, and model. Built-in presets for OpenRouter, direct TypeSafe, DeepSeek official, and Tongyi-compatible endpoints, each with a one-tap connectivity test. A single OpenRouter key is enough to get started.</p>
+      </article>
+
+      <article class="card reveal">
+        <span class="card-ico">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="5" y="10.5" width="14" height="9.5" rx="2.4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8.2 10.5V8a3.8 3.8 0 0 1 7.6 0v2.5" fill="none" stroke="currentColor" stroke-width="1.7"/><circle cx="12" cy="15" r="1.5" fill="currentColor"/></svg>
+        </span>
+        <h3>Privacy stays on-device</h3>
+        <p>Keys are stored only in the app's private storage. Chat content is only sent to your configured model endpoint at the moment of analysis — never written to disk or logged. History is off by default, and even when enabled it's stored only on your device.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== PLATFORMS ===================== -->
+<section class="sec sec-alt" id="platforms">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 class="reveal">Platform support</h2>
+      <p class="sec-lead reveal">Based on real-device testing; version numbers are the ones verified.</p>
+    </div>
+
+    <div class="table-scroll reveal">
+      <table class="plat">
+        <thead>
+          <tr><th scope="col">Platform</th><th scope="col">Status</th><th scope="col">Notes</th></tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">WeChat Android</th><td><span class="dot ok"></span>Full pipeline</td><td>Verified on 8.0.78</td></tr>
+          <tr><th scope="row">QQ Android</th><td><span class="dot ok"></span>Full pipeline</td><td>Verified on 9.3.50</td></tr>
+          <tr><th scope="row">X / Twitter DMs</th><td><span class="dot ok"></span>Full pipeline</td><td>Verified on 12.25, Chinese UI</td></tr>
+          <tr><th scope="row">Feishu / Lark</th><td><span class="dot wip"></span>OCR fallback</td><td>Verified on real hardware, offline OCR for message text</td></tr>
+          <tr><th scope="row">Instagram</th><td><span class="dot ok"></span>Full pipeline</td><td>DMs, real device</td></tr>
+          <tr><th scope="row">Google Messages (SMS)</th><td><span class="dot ok"></span>Full pipeline</td><td>SMS/RCS threads, real device</td></tr>
+          <tr><th scope="row">Any other app</th><td><span class="dot wip"></span>Manual</td><td>"Read screen once (OCR)" from the overlay menu</td></tr>
+          <tr><th scope="row">WeChat Windows 4.x</th><td><span class="dot ok"></span>Full pipeline</td><td>v0.1.6 · window screenshot + offline OCR</td></tr>
+          <tr><th scope="row">WeChat macOS</th><td><span class="dot ok"></span>Full pipeline</td><td>v0.3.0 · screen reading + local model</td></tr>
+          <tr><th scope="row">Web</th><td><span class="dot plan"></span>Planned</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DESKTOP ===================== -->
+<section class="sec" id="desktop">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 class="reveal">Three platforms, one judgment core</h2>
+      <p class="sec-lead reveal">Judging, drafting, and ranking all share the same core; only how each platform captures the screen differs. The rule stays the same everywhere: read-only, fill but never send.</p>
+    </div>
+
+    <div class="grid grid-3">
+      <article class="card contact-card reveal">
+        <span class="card-ico">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10 19h4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </span>
+        <h3>Android · v1.3</h3>
+        <p>The accessibility service reads the conversation on screen, falling back to offline OCR when it can't. WeChat / QQ / X / Feishu / Instagram / Messages are all working end to end.</p>
+        <a class="link-arrow" data-jev-apk href="#">Download</a>
+        <a class="link-arrow" data-jev-repo href="#" target="_blank" rel="noopener">Source</a>
+      </article>
+
+      <article class="card contact-card reveal">
+        <span class="card-ico">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><rect x="3" y="4.5" width="18" height="12" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M8.5 20h7M12 16.5V20" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+        </span>
+        <h3>Windows · v0.1.6</h3>
+        <p>Screenshots your own WeChat window + local offline OCR — no hooking, no reading the database. Built for WeChat Windows 4.x.</p>
+        <a class="link-arrow" href="https://github.com/jev-chat/jev-chat-windows/releases" target="_blank" rel="noopener">Download</a>
+        <a class="link-arrow" href="https://github.com/jev-chat/jev-chat-windows" target="_blank" rel="noopener">Source</a>
+      </article>
+
+      <article class="card contact-card reveal">
+        <span class="card-ico">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 5.5A1.5 1.5 0 0 1 6.5 4h11A1.5 1.5 0 0 1 19 5.5V15H5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M2.5 15h19l-1.4 3.1a1.7 1.7 0 0 1-1.55 1H5.45a1.7 1.7 0 0 1-1.55-1z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+        </span>
+        <h3>macOS · v0.3.0</h3>
+        <p>Reads the screen and uses a local small model to judge intent and risk level, drafts candidates in your own voice, and ranks them locally. Built for WeChat macOS.</p>
+        <a class="link-arrow" href="https://github.com/jev-chat/jev-chat-jarvis-mac/releases" target="_blank" rel="noopener">Download</a>
+        <a class="link-arrow" href="https://github.com/jev-chat/jev-chat-jarvis-mac" target="_blank" rel="noopener">Source</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== START ===================== -->
+<section class="sec" id="start">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 class="reveal">Three steps to start</h2>
+      <p class="sec-lead reveal">Install the APK on Android; download Windows / macOS from their own release pages.</p>
+    </div>
+
+    <div class="grid grid-3 steps">
+      <article class="card step reveal">
+        <span class="step-no">01</span>
+        <h3>Install</h3>
+        <p>Download the APK and install it directly, Android 11+. Or use adb:</p>
+        <div class="cmd cmd-mini">
+          <code>adb install -r jev-assistant-v<span data-jev-version>1.2</span>-release.apk</code>
+        </div>
+        <a class="btn btn-primary btn-sm" data-jev-apk href="#">Download APK v<span data-jev-version>1.2</span></a>
+        <p class="hero-note step-note">Desktop: <a href="https://github.com/jev-chat/jev-chat-windows/releases" target="_blank" rel="noopener">Windows v0.1.6</a> · <a href="https://github.com/jev-chat/jev-chat-jarvis-mac/releases" target="_blank" rel="noopener">macOS v0.3.0</a></p>
+      </article>
+
+      <article class="card step reveal">
+        <span class="step-no">02</span>
+        <h3>Add your key</h3>
+        <p>Settings → Endpoints → fill the Judge API card with your OpenRouter API key; leave the rest blank and they'll inherit it automatically. All three endpoints have a one-tap connectivity test.</p>
+        <a class="shot" data-jev-repo href="#" target="_blank" rel="noopener" title="Settings page">
+          <img src="assets/settings.webp" alt="Jev Chat Assistant settings page: separate URL, key, and model fields for the Judge / Reply / Vision endpoints" width="900" height="2002" loading="lazy" decoding="async">
+        </a>
+      </article>
+
+      <article class="card step reveal">
+        <span class="step-no">03</span>
+        <h3>Grant permissions</h3>
+        <p>Accessibility, overlay window, autostart + no battery restrictions. The last two are required on Xiaomi / HyperOS, or the bubble gets frozen.</p>
+        <ul class="ticks">
+          <li>Accessibility service</li>
+          <li>Overlay window</li>
+          <li>Autostart + no battery restrictions</li>
+        </ul>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== HOW ===================== -->
+<section class="sec sec-alt" id="how">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 class="reveal">How it works</h2>
+      <p class="sec-lead reveal">From a message on screen to a sentence in the input box — just these few steps.</p>
+    </div>
+
+    <div class="flow reveal">
+      <div class="flow-node">
+        <span class="flow-idx">1</span>
+        <h4>Capture the on-screen message</h4>
+        <p>The accessibility service reads the current conversation; falls back to screenshot OCR if it can't</p>
+      </div>
+      <span class="flow-arrow" aria-hidden="true"></span>
+      <div class="flow-node flow-split">
+        <span class="flow-idx">2</span>
+        <div class="flow-pair">
+          <div class="flow-half">
+            <h4>Jev judges</h4>
+            <p>Intent · risk level 1–9 · whether to reply now</p>
+          </div>
+          <div class="flow-half">
+            <h4>Generation model drafts</h4>
+            <p>3 natural-sounding candidate replies</p>
+          </div>
+        </div>
+      </div>
+      <span class="flow-arrow" aria-hidden="true"></span>
+      <div class="flow-node">
+        <span class="flow-idx">3</span>
+        <h4>Jev ranks</h4>
+        <p>Re-ranks by "best fit" and gives each a share</p>
+      </div>
+      <span class="flow-arrow" aria-hidden="true"></span>
+      <div class="flow-node">
+        <span class="flow-idx">4</span>
+        <h4>Overlay display</h4>
+        <p>The judgment plus three candidates, right next to the conversation</p>
+      </div>
+      <span class="flow-arrow" aria-hidden="true"></span>
+      <div class="flow-node flow-end">
+        <span class="flow-idx">5</span>
+        <h4>Copy / Fill</h4>
+        <p><strong>Never sends</strong> — that last tap is always yours</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== FAQ ===================== -->
+<section class="sec" id="faq">
+  <div class="wrap wrap-narrow">
+    <div class="sec-head">
+      <h2 class="reveal">FAQ</h2>
+    </div>
+
+    <div class="faq reveal">
+      <details>
+        <summary>Will it send messages automatically?<span class="acc-ico" aria-hidden="true"></span></summary>
+        <div class="faq-body"><p>No. It only fills the reply into the input box — it never sends automatically, and never touches transfers, red packets, or receiving payments. Whether to send, and any edits, are entirely up to you.</p></div>
+      </details>
+      <details>
+        <summary>Does it support iOS?<span class="acc-ico" aria-hidden="true"></span></summary>
+        <div class="faq-body"><p>Not yet. There are already separate desktop versions: <a href="https://github.com/jev-chat/jev-chat-windows" target="_blank" rel="noopener">Windows</a> (v0.1.6) and <a href="https://github.com/jev-chat/jev-chat-jarvis-mac" target="_blank" rel="noopener">macOS</a> (v0.3.0), plus Android (v1.3) — each maintained in its own repository.</p></div>
+      </details>
+      <details>
+        <summary>Does it work on desktop?<span class="acc-ico" aria-hidden="true"></span></summary>
+        <div class="faq-body"><p>Yes. The <a href="https://github.com/jev-chat/jev-chat-windows" target="_blank" rel="noopener">Windows version</a> (v0.1.6) is built for WeChat Windows 4.x — it screenshots your own window plus local offline OCR; the <a href="https://github.com/jev-chat/jev-chat-jarvis-mac" target="_blank" rel="noopener">macOS version</a> (v0.3.0) is built for WeChat macOS — it reads the screen and judges with a local small model. There's no web version planned yet.</p></div>
+      </details>
+      <details>
+        <summary>What keys do I need?<span class="acc-ico" aria-hidden="true"></span></summary>
+        <div class="faq-body"><p>A single OpenRouter API key is enough to get running — put it in the "Judge API" field, and the Reply and Vision endpoints will inherit it automatically if left blank. You can also configure all three separately; built-in presets cover OpenRouter, direct TypeSafe, DeepSeek official, and Tongyi-compatible endpoints, each with a one-tap connectivity test.</p></div>
+      </details>
+      <details>
+        <summary>Is my chat content uploaded anywhere?<span class="acc-ico" aria-hidden="true"></span></summary>
+        <div class="faq-body"><p>It's only sent to your own configured model endpoint at the moment of analysis, never written to disk or logged afterward. Keys are stored only in the app's private storage. History is off by default, and even when enabled it stays on your device. OCR runs through ML Kit's offline Chinese recognition, so images are never uploaded.</p></div>
+      </details>
+      <details>
+        <summary>How accurate is it in group chats? What are the known limitations?<span class="acc-ico" aria-hidden="true"></span></summary>
+        <div class="faq-body">
+          <ul>
+            <li>Group chats are currently analyzed the same way as 1:1 chats, so judgments can be off when multiple people are talking at once.</li>
+            <li>Some Android OEM ROMs' background-freezing policies can make the overlay bubble briefly disappear; enabling autostart and disabling battery restrictions helps.</li>
+            <li>X / Twitter has only been verified with the Chinese UI language.</li>
+          </ul>
+        </div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CONTACT ===================== -->
+<section class="sec sec-alt" id="contact">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2 class="reveal">Contact &amp; community</h2>
+      <p class="sec-lead reveal">Questions, suggestions, or want to help add a new app — reach out.</p>
+    </div>
+
+    <div class="contact-grid">
+      <article class="card contact-card reveal">
+        <img class="qr" src="assets/wechat-mp.webp" alt="Jev Chat Assistant WeChat official account QR code" width="420" height="420" loading="lazy" decoding="async">
+        <h3>WeChat official account DM</h3>
+        <p>Scan to follow; a DM there is the most direct way to reach us.</p>
+      </article>
+
+      <article class="card contact-card reveal">
+        <span class="card-ico">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v8A2.5 2.5 0 0 1 17.5 17H9l-5 3.5z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+        </span>
+        <h3>Community group</h3>
+        <p>The group QR code expires after 7 days; the latest one is kept at the bottom of the repo README.</p>
+        <a class="link-arrow" data-jev-readme href="#" target="_blank" rel="noopener">Get the group QR code from the README</a>
+      </article>
+
+      <article class="card contact-card reveal">
+        <span class="card-ico">
+          <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 7.5v5.2" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/><circle cx="12" cy="16.3" r="1.2" fill="currentColor"/></svg>
+        </span>
+        <h3>GitHub Issues</h3>
+        <p>For bugs, an app that isn't being read correctly, or a request for a new adapter — Issues is the best way to track it.</p>
+        <a class="link-arrow" data-jev-issues href="#" target="_blank" rel="noopener">Open an issue</a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== CTA ===================== -->
+<section class="cta-band">
+  <div class="wrap cta-inner reveal">
+    <h2>Install now — your next message gets a copilot</h2>
+    <p>Open source, MIT · Android v<span data-jev-version>1.2</span> · Windows v0.1.6 · macOS v0.3.0</p>
+    <div class="hero-btns">
+      <a class="btn btn-primary" data-jev-apk href="#">Download APK v<span data-jev-version>1.2</span></a>
+      <a class="btn btn-ghost" href="https://github.com/jev-chat/jev-chat-windows/releases" target="_blank" rel="noopener">Windows v0.1.6</a>
+      <a class="btn btn-ghost" href="https://github.com/jev-chat/jev-chat-jarvis-mac/releases" target="_blank" rel="noopener">macOS v0.3.0</a>
+      <a class="btn btn-star" data-jev-repo href="#" target="_blank" rel="noopener" title="Star it on GitHub"><svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.4 7.4 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg><span>GitHub</span><span class="star-count" aria-label="Star count"><span aria-hidden="true">★</span> <b data-jev-stars>1.3k</b></span></a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-grid">
+    <div class="foot-brand">
+      <a class="brand" href="#top">
+        <img src="assets/favicon.svg" alt="" width="28" height="28" class="brand-mark">
+        <span class="brand-name">Jev Chat Assistant</span>
+      </a>
+      <p class="foot-tag">A conversation copilot in any chat. Reads the other person, three replies, fills in one tap.</p>
+    </div>
+
+    <nav class="foot-col" aria-label="Product">
+      <h4>Product</h4>
+      <a data-jev-apk href="#">Download APK v<span data-jev-version>1.2</span></a>
+      <a href="https://github.com/jev-chat/jev-chat-windows/releases" target="_blank" rel="noopener">Windows version</a>
+      <a href="https://github.com/jev-chat/jev-chat-jarvis-mac/releases" target="_blank" rel="noopener">macOS version</a>
+      <a href="#start">Quick start</a>
+      <a href="#platforms">Platform support</a>
+    </nav>
+
+    <nav class="foot-col" aria-label="Resources">
+      <h4>Resources</h4>
+      <a data-jev-repo href="#" target="_blank" rel="noopener">GitHub</a>
+      <a data-jev-readme href="#" target="_blank" rel="noopener">README</a>
+      <a data-jev-commits href="#" target="_blank" rel="noopener">Changelog</a>
+      <a data-jev-issues href="#" target="_blank" rel="noopener">Issues</a>
+    </nav>
+
+    <nav class="foot-col" aria-label="Community">
+      <h4>Community</h4>
+      <a href="#contact">WeChat account</a>
+      <a data-jev-readme href="#" target="_blank" rel="noopener">Community group</a>
+    </nav>
+  </div>
+
+  <div class="wrap foot-bottom">
+    <p>© 2026 Jev Chat Assistant · <a href="https://github.com/jev-chat/jev-chat-jarvis/blob/main/LICENSE" target="_blank" rel="noopener">MIT licensed</a> · Commercial use allowed, attribution required (see <a href="https://github.com/jev-chat/jev-chat-jarvis/blob/main/NOTICE" target="_blank" rel="noopener">NOTICE</a>)</p>
+    <p class="disclaimer">For personal learning and research only. It only processes chats on your own device that you already have the right to view. Please comply with each app's license terms and local laws.</p>
+  </div>
+</footer>
+
+<script src="main.js?v=20260922b"></script>
+</body>
+</html>

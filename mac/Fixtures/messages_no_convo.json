@@ -1,0 +1,5 @@
+{"role": "AXWindow", "x": 0, "y": 0, "w": 1000, "h": 1000, "children": [
+  {"role": "AXTextField", "subrole": "AXSearchField", "editable": true, "x": 10, "y": 50, "w": 280, "h": 24},
+  {"role": "AXScrollArea", "x": 0, "y": 80, "w": 300, "h": 920, "children": [
+    {"role": "AXStaticText", "value": "Sam", "x": 60, "y": 100, "w": 100, "h": 20}]}
+]}

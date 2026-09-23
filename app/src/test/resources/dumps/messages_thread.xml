@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<hierarchy rotation="0">
+  <node index="0" text="" resource-id="" class="android.widget.FrameLayout" package="com.google.android.apps.messaging" content-desc="" bounds="[0,0][1080,2400]">
+    <node index="0" text="Mom" resource-id="com.google.android.apps.messaging:id/conversation_title" class="android.widget.TextView" package="com.google.android.apps.messaging" content-desc="" bounds="[200,110][400,170]" />
+    <node index="1" text="Did you land?" resource-id="com.google.android.apps.messaging:id/message_text" class="android.widget.TextView" package="com.google.android.apps.messaging" content-desc="" bounds="[60,500][520,570]" />
+    <node index="2" text="9:41 AM" resource-id="com.google.android.apps.messaging:id/message_status" class="android.widget.TextView" package="com.google.android.apps.messaging" content-desc="" bounds="[60,575][240,610]" />
+    <node index="3" text="Just now, waiting for bags" resource-id="com.google.android.apps.messaging:id/message_text" class="android.widget.TextView" package="com.google.android.apps.messaging" content-desc="" bounds="[480,660][1030,730]" />
+    <node index="4" text="Call me when you're out" resource-id="com.google.android.apps.messaging:id/message_text" class="android.widget.TextView" package="com.google.android.apps.messaging" content-desc="" bounds="[60,820][640,890]" />
+    <node index="5" text="" resource-id="com.google.android.apps.messaging:id/compose_message_text" class="android.widget.EditText" package="com.google.android.apps.messaging" content-desc="" bounds="[150,2250][880,2330]" />
+  </node>
+</hierarchy>

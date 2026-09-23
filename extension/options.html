@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Jev Assistant options</title>
+<style>
+  :root { color-scheme: light dark; font: 14px/1.4 system-ui, sans-serif; }
+  body { max-width: 520px; margin: 24px auto; padding: 0 16px; }
+  label { display: block; margin: 12px 0 4px; }
+  input, textarea { width: 100%; box-sizing: border-box; }
+</style></head>
+<body>
+  <h1>Jev Assistant</h1>
+  <label for="judgeKey">Judge API key (OpenRouter)</label><input id="judgeKey" type="password" autocomplete="off">
+  <label for="replyKey">Reply API key (optional, reuses the Judge key when empty)</label><input id="replyKey" type="password" autocomplete="off">
+  <label for="relationship">Who is the other person to you?</label><textarea id="relationship" rows="2"></textarea>
+  <label><input id="auto" type="checkbox" style="width:auto"> Analyze automatically when they send a message</label>
+  <details><summary>Advanced</summary>
+    <label for="judgeUrl">Judge URL</label><input id="judgeUrl">
+    <label for="judgeModel">Judge model</label><input id="judgeModel">
+    <label for="replyUrl">Reply URL (…/chat/completions)</label><input id="replyUrl">
+    <label for="replyModel">Reply model</label><input id="replyModel">
+  </details>
+  <p><button id="save">Save</button> <span id="status"></span></p>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

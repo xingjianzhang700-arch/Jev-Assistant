@@ -1,0 +1,5 @@
+{"role": "AXWindow", "x": 0, "y": 0, "w": 1000, "h": 1000, "children": [
+  {"role": "AXScrollArea", "x": 300, "y": 100, "w": 700, "h": 780, "children": [
+    {"role": "AXImage", "x": 320, "y": 120, "w": 250, "h": 200}]},
+  {"role": "AXTextArea", "editable": true, "x": 340, "y": 900, "w": 600, "h": 30}
+]}

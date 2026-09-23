@@ -1,0 +1,50 @@
+public struct Msg: Equatable {
+    public let side: String   // "me" | "other"
+    public let text: String
+    public init(_ side: String, _ text: String) { self.side = side; self.text = text }
+}
+
+public struct Snapshot: Equatable {
+    public let title: String?
+    public let messages: [Msg]
+    public init(title: String?, messages: [Msg]) { self.title = title; self.messages = messages }
+    public var latestFrom: String? { messages.last?.side }
+    public var signature: String {
+        (title ?? "") + "#" + messages.suffix(6).map { "\($0.side):\($0.text)" }.joined(separator: "|")
+    }
+}
+
+public struct RankedReply: Equatable {
+    public let text: String
+    public let prob: Double
+}
+
+public struct Summary: Equatable {
+    public let intent: String?
+    public let risk: Double?
+    public let needs: String?
+    public let bestAction: String?
+    public let specificsOk: Double?
+    public let tensionResolved: Double?
+    public init(intent: String?, risk: Double?, needs: String?, bestAction: String?,
+                specificsOk: Double?, tensionResolved: Double?) {
+        self.intent = intent; self.risk = risk; self.needs = needs; self.bestAction = bestAction
+        self.specificsOk = specificsOk; self.tensionResolved = tensionResolved
+    }
+}
+
+/// "me" when the bubble hugs the right edge more than the left.
+public func sideByEdges(left: Double, right: Double, width: Double) -> String {
+    width - right < left ? "me" : "other"
+}
+
+/// Menu-bar Jev only reads these apps. Instagram / Snapchat are the Chrome extension.
+public func macChatReads(_ bundle: String?) -> Bool {
+    guard let bundle else { return false }
+    return bundle == MessagesApp.bundleID || WhatsAppApp.bundleIDs.contains(bundle)
+}
+
+/// Drop the stored thread once the user leaves Messages / WhatsApp Desktop.
+public func keepChat(_ snap: Snapshot?, frontmost: String?) -> Snapshot? {
+    macChatReads(frontmost) ? snap : nil
+}

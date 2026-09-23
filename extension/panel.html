@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Jev Assistant</title>
+  <style>
+    :root { color-scheme: light dark; font: 14px/1.4 system-ui, sans-serif; }
+    body { margin: 0; padding: 12px; }
+    h1 { font-size: 15px; margin: 0 0 8px; }
+    .sub { opacity: .7; font-size: 12px; }
+    .err { color: #dc2626; }
+    .reply { border: 1px solid #8884; border-radius: 8px; padding: 8px; margin: 8px 0; }
+    .reply button { margin-right: 6px; }
+  </style>
+</head>
+<body>
+  <h1 id="title">Jev</h1>
+  <div id="body" class="sub">Open an Instagram or Google Messages conversation.</div>
+  <p><button id="analyze">Analyze</button> <span id="note" class="sub"></span></p>
+  <script type="module" src="panel.js"></script>
+</body>
+</html>
