@@ -9,14 +9,16 @@ let brainJSONText = #"""
   "draft_user_template": "Relationship: {relationship}\n\nRecent conversation:\n{conversation}\n\nGive 3 candidate replies.",
   "judge_questions": {
     "mood": {
-      "instructions": "What is the other person's mood across these messages? Weight the latest line most, and use earlier lines for tone. Pick the single closest fit. Facts given in background are provided context, not off-topic.",
+      "instructions": "What is the other person's mood across these messages? Weight the latest line most, and use earlier lines for tone. Pick the single closest fit. Only choose a mood the messages support from wording, tone, and what they did — not a guess about their personality. Facts given in background are provided context, not off-topic.",
       "criteria": {
         "flirty": "They are teasing, complimenting, or playing along with romantic interest.",
         "playful": "They are joking or bantering. Warm, but not clearly flirting back.",
         "warm": "Friendly, pleased, or affectionate, without a joke and without a test.",
         "neutral": "Plain, practical, or hard to read. No strong feeling either way.",
         "unsure": "Hesitant, awkward, or keeping some distance while still replying.",
-        "annoyed": "Irritated, unimpressed, sarcastic, or shutting a line down.",
+        "frustrated": "Mild irritation or impatience; annoyed or short, but not openly angry.",
+        "angry": "Clearly angry and blaming; heat is up, but not exploding.",
+        "furious": "Intense rage or explosive anger; the hottest, most livid reads.",
         "hurt": "Sad, cold, or wounded. The feeling is pain more than irritation."
       },
       "type": "choice"
@@ -108,8 +110,9 @@ let brainJSONText = #"""
               "care": "your care", "nothing": "(nothing)"},
     "action": {"check_history": "check history", "apologize": "apologize first", "give_commitment": "commit",
                "explain": "explain", "acknowledge": "acknowledge", "say_less": "say less", "make_plan": "make a plan"},
-    "mood": {"flirty": "flirty", "playful": "playful", "warm": "warm", "neutral": "neutral",
-             "unsure": "unsure", "annoyed": "annoyed", "hurt": "hurt"}
+    "mood": {"flirty": "Flirty", "playful": "Playful", "warm": "Warm", "neutral": "Neutral",
+             "unsure": "Unsure", "frustrated": "Frustrated", "angry": "Angry", "furious": "Furious",
+             "hurt": "Hurt"}
   }
 }
 """#

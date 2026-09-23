@@ -18,6 +18,8 @@
     button { margin-top: 14px; width: 100%; border: 0; border-radius: 12px; padding: 14px;
       background: #1c5c58; color: #e8edf2; font: inherit; font-weight: 650; }
     .card { margin-top: 14px; border: 1px solid #2a323e; border-radius: 14px; padding: 12px 14px; background: #171c24; }
+    .moods { display: flex; flex-wrap: wrap; gap: 16px; align-items: baseline; font-weight: 650; }
+    .mood-label { color: #8b97a6; }
     .reply { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
     .reply button { width: auto; margin: 0; padding: 8px 12px; }
     .err { color: #f0a8a8; }
@@ -30,6 +32,9 @@
   <label for="key">OpenRouter API key</label>
   <input id="key" type="password" autocomplete="off" placeholder="sk-or-v1-…">
   <p class="hint">Saved only in this browser. Create one at openrouter.ai/keys and set a spending cap.</p>
+  <label for="relationship">Who is the other person to you?</label>
+  <textarea id="relationship" rows="2" style="min-height:4.5rem" placeholder="e.g. A classmate I study with; from=me is what I sent, from=other is what they sent"></textarea>
+  <p class="hint">Jev uses this as who they are to you. Leave blank for the default.</p>
   <label for="chat">Chat</label>
   <textarea id="chat" placeholder="Me: be honest. are you a parking ticket&#10;Her: sir. it is tuesday."></textarea>
   <p class="hint">Start each line with Me: or Her:. On a phone, copy the thread from the chat app and paste it here.</p>
@@ -40,6 +45,7 @@
 const $ = (id) => document.getElementById(id);
 const out = $("out");
 $("key").value = localStorage.getItem("jev-key") || "";
+$("relationship").value = localStorage.getItem("jev-relationship") || "";
 
 function parseChat(raw) {
   const msgs = [];
@@ -86,25 +92,51 @@ $("go").onclick = async () => {
   out.append(textCard("Analyzing…"));
   try {
     const brain = await loadBrain();
-    const state = { chat: { relationship: brain.default_relationship, messages: messages.map((m) => ({ from: m.side, text: m.text })), latest_from: messages.at(-1).side } };
+    const relationship = ($("relationship").value.trim() || brain.default_relationship);
+    localStorage.setItem("jev-relationship", $("relationship").value.trim());
+    const state = { chat: { relationship, messages: messages.map((m) => ({ from: m.side, text: m.text })), latest_from: messages.at(-1).side } };
     const convo = messages.map((m) => (m.side === "me" ? "Me: " : "Them: ") + m.text).join("\n");
     const [judged, drafted] = await Promise.all([
       post(brain.judge_url_default, key, { model: brain.judge_model_default, state, questions: brain.judge_questions }),
       post(brain.reply_url_default, key, { model: brain.reply_model_default, temperature: 0.8, messages: [
         { role: "system", content: brain.draft_system },
-        { role: "user", content: brain.draft_user_template.replace("{relationship}", brain.default_relationship).replace("{conversation}", convo) },
+        { role: "user", content: brain.draft_user_template.replace("{relationship}", relationship).replace("{conversation}", convo) },
       ] }),
     ]);
     const answers = judged.answers || {};
     const mood = answers.mood || {};
-    const pctRaw = mood.probabilities?.[mood.choice] ?? mood.confidence;
-    const pct = Number.isFinite(Number(pctRaw)) ? Math.round(Number(pctRaw) * 100) : null;
+    const moodProbs = mood.probabilities || {};
+    let moodParts = Object.entries(moodProbs)
+      .map(([k, v]) => [k, Number(v)])
+      .filter(([, n]) => Number.isFinite(n))
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([k, n]) => `${brain.labels?.mood?.[k] || k} ${Math.round(n * 100)}%`);
+    if (!moodParts.length && mood.choice) {
+      const pctRaw = mood.probabilities?.[mood.choice] ?? mood.confidence;
+      const pct = Number.isFinite(Number(pctRaw)) ? Math.round(Number(pctRaw) * 100) : null;
+      moodParts = [`${brain.labels?.mood?.[mood.choice] || mood.choice}${pct == null ? "" : ` ${pct}%`}`];
+    }
     let replies = [];
     try { replies = JSON.parse((drafted.choices?.[0]?.message?.content || "").match(/\[[\s\S]*\]/)?.[0] || "[]"); } catch { replies = []; }
     replies = replies.map((s) => String(s).trim()).filter(Boolean).slice(0, 3);
     while (replies.length < 3) replies.push(brain.fallback_reply);
     out.replaceChildren();
-    if (mood.choice) out.append(textCard(`Mood: ${brain.labels?.mood?.[mood.choice] || mood.choice}${pct == null ? "" : ` ${pct}%`}`));
+    if (moodParts.length) {
+      const d = card("");
+      d.classList.add("moods");
+      const moodLabel = document.createElement("span");
+      moodLabel.className = "mood-label";
+      moodLabel.textContent = "Mood:";
+      d.append(moodLabel);
+      for (const part of moodParts) {
+        const span = document.createElement("span");
+        span.className = "mood";
+        span.textContent = part;
+        d.append(span);
+      }
+      out.append(d);
+    }
     const intent = answers.true_intent?.choice;
     if (intent) out.append(textCard(`Intent: ${brain.labels?.intent?.[intent] || intent}`));
     for (const text of replies) {

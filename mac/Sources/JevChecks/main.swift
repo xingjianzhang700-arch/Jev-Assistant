@@ -40,16 +40,30 @@ check(rk.map(\.text) == ["b", "a", "c"], "ranked sorts by prob")
 let sm = Prompt.summary([
     "true_intent": ["choice": "casual_chat"], "danger_level": ["score": 1.4], "she_needs": ["choice": "nothing"],
     "best_action": ["choice": "make_plan"], "should_reply_now": ["noul": 0.9], "tension_resolved": ["noul": 0.95],
-    "mood": ["choice": "playful", "confidence": 0.2, "probabilities": ["playful": 0.64, "annoyed": 0.1]],
+    "mood": ["choice": "angry", "confidence": 0.7,
+             "probabilities": ["frustrated": 0.1, "furious": 0.2, "angry": 0.7, "warm": 0.05]],
 ])
 check(sm == Summary(intent: "casual_chat", risk: 1.4, needs: "nothing", bestAction: "make_plan",
-                    specificsOk: 0.9, tensionResolved: 0.95, mood: "playful", moodPct: 64), "summary fields")
+                    specificsOk: 0.9, tensionResolved: 0.95, mood: "angry", moodPct: 70,
+                    moods: [MoodGuess("angry", 70), MoodGuess("furious", 20), MoodGuess("frustrated", 10)]),
+      "summary fields")
+check(Prompt.topMoods(["choice": "warm", "confidence": 0.5, "probabilities": ["warm": 0.81]]) ==
+        [MoodGuess("warm", 81)], "top moods does not invent extras")
 check(brainLabel("intent", "casual_chat") == "casual chat", "labels from brain")
+check(brainLabel("mood", "frustrated") == "Frustrated", "mood labels title case")
 
 // Side rule
 check(sideByEdges(left: 20, right: 270, width: 700) == "other", "short incoming")
 check(sideByEdges(left: 450, right: 680, width: 700) == "me", "short outgoing")
 check(sideByEdges(left: 20, right: 600, width: 700) == "other", "long incoming")
+// Trailing-edge rule: share the column's max right → me (gutter to window edge is irrelevant).
+let cloud = sidesByBalloonEdges(lefts: [48, 288, 268], rights: [228, 428, 448])
+check(cloud == ["other", "me", "me"], "sides from shared trailing edge, not window width")
+check(sidesByBalloonEdges(lefts: [48], rights: [228]) == ["other"], "single balloon stays other")
+let longMe = sidesByBalloonEdges(lefts: [1008, 1320, 1373], rights: [1398, 1398, 1398])
+check(longMe == ["me", "me", "me"], "long outgoing stays me via trailing edge")
+let mixed = sidesByBalloonEdges(lefts: [756, 1044, 1373], rights: [976, 1398, 1398])
+check(mixed == ["other", "me", "me"], "left gray other, right blues me")
 
 let sms = Snapshot(title: "Sam", messages: [Msg("other", "hi")])
 check(macChatReads("com.apple.MobileSMS") && macChatReads("net.whatsapp.WhatsApp"), "Mac chat apps")
@@ -74,6 +88,14 @@ let tahoe = MessagesApp.parse(load("messages_tahoe.json"))
 check(tahoe?.title == "Sam", "tahoe: title from ConversationTitle")
 check(tahoe?.messages == [Msg("other", "are we still on for 7?"), Msg("me", "yes, see you there"),
                           Msg("other", "see you at 7")], "tahoe: editable CKBalloonTextView bubbles")
+// Wide window + gutter: outgoing share a trailing edge far from the window's right.
+// Centered emoji is kept as a message but must not flip text sides.
+let wide = MessagesApp.parse(load("messages_wide_window.json"))
+check(wide?.title == "Pat", "wide: ConversationTitle")
+check(wide?.messages == [Msg("other", "proofs again?"), Msg("me", "yeah toast"),
+                         Msg("me", "😂"), Msg("me", "try the demo track"),
+                         Msg("me", "I am drilling basics")],
+      "wide: trailing-edge me/other; centered emoji inherits me")
 
 let wa = WhatsAppApp.parse(load("whatsapp_window.json"))
 check(wa?.title == "Alex", "whatsapp: title above first message")

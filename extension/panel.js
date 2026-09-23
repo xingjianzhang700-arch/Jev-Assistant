@@ -13,7 +13,20 @@ function render(view) {
   if (view.error) { body.append(el("div", "Something went wrong", "err"), el("div", view.error, "sub")); return; }
   if (view.status) { body.append(el("div", view.status, "sub")); return; }
   const s = view.summary ?? {};
-  if (s.mood) body.append(el("div", `Mood: ${label("mood", s.mood)}${s.moodPct == null ? "" : ` ${s.moodPct}%`}`));
+  if (s.moods?.length) {
+    const row = el("div", "", "moods");
+    row.append(el("span", "Mood:", "mood-label"));
+    for (const m of s.moods) {
+      const name = label("mood", m.key);
+      row.append(el("span", m.pct == null ? name : `${name} ${m.pct}%`, "mood"));
+    }
+    body.append(row);
+  } else if (s.mood) {
+    const row = el("div", "", "moods");
+    row.append(el("span", "Mood:", "mood-label"));
+    row.append(el("span", s.moodPct == null ? label("mood", s.mood) : `${label("mood", s.mood)} ${s.moodPct}%`, "mood"));
+    body.append(row);
+  }
   if (s.intent) body.append(el("div", `Their real intent: ${label("intent", s.intent)}`));
   const bits = [];
   if (s.risk != null) bits.push(`Risk ${Math.round(s.risk)}/9`);

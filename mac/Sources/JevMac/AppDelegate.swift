@@ -44,14 +44,24 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         if preview {
+            // Fictional chat only — for docs screenshots. Optional: --preview /path/out.png
+            panel.show(title: "Alex")
             panel.show(summary: Summary(
-                intent: "close_topic", risk: 0, needs: "nothing", bestAction: "make_plan",
-                specificsOk: 0.2, tensionResolved: 0.9, mood: "playful", moodPct: 64),
+                intent: "close_topic", risk: 2, needs: "nothing", bestAction: "make_plan",
+                specificsOk: 0.2, tensionResolved: 0.9, mood: "angry", moodPct: 70,
+                moods: [MoodGuess("angry", 70), MoodGuess("furious", 20), MoodGuess("frustrated", 10)]),
                 replies: [
                     RankedReply(text: "Got it. Want me to snag both our tickets tomorrow? We can settle up after.", prob: 0.51),
                     RankedReply(text: "Sweet, thanks for the info. I'll grab mine soon. You heading home after the gym?", prob: 0.44),
                     RankedReply(text: "Cool cool. Good workout?", prob: 0.05),
                 ])
+            let out = CommandLine.arguments.dropFirst().first(where: { $0.hasSuffix(".png") })
+                ?? "/tmp/jev-preview-panel.png"
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) { [weak self] in
+                let ok = self?.panel.writePNG(to: out) == true
+                fputs(ok ? "preview wrote \(out)\n" : "preview failed to write \(out)\n", stderr)
+                NSApp.terminate(nil)
+            }
         }
 
         if !preview && !UserDefaults.standard.bool(forKey: "didShowMenuHint") {

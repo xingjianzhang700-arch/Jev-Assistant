@@ -72,13 +72,35 @@ test("summarize picks the fields the panel shows", () => {
     tension_resolved: { noul: 0.95 },
   });
   assert.deepEqual(s, { intent: "casual_chat", intentConfidence: 0.8, risk: 1.4, needs: "nothing",
-    bestAction: "make_plan", specificsOk: 0.9, tensionResolved: 0.95, mood: null, moodPct: null });
+    bestAction: "make_plan", specificsOk: 0.9, tensionResolved: 0.95, mood: null, moodPct: null, moods: [] });
 });
 
 test("mood percent uses the chosen mood's probability", () => {
   const s = summarize({ mood: { choice: "flirty", confidence: 0.4, probabilities: { flirty: 0.72, annoyed: 0.1 } } });
   assert.equal(s.mood, "flirty");
   assert.equal(s.moodPct, 72);
+});
+
+test("top moods are the three highest probabilities, highest first", () => {
+  const s = summarize({
+    mood: {
+      choice: "angry",
+      confidence: 0.7,
+      probabilities: { frustrated: 0.1, furious: 0.2, angry: 0.7, warm: 0.05 },
+    },
+  });
+  assert.deepEqual(s.moods, [
+    { key: "angry", pct: 70 },
+    { key: "furious", pct: 20 },
+    { key: "frustrated", pct: 10 },
+  ]);
+  assert.equal(s.mood, "angry");
+  assert.equal(s.moodPct, 70);
+});
+
+test("top moods keeps a single probability without inventing others", () => {
+  const s = summarize({ mood: { choice: "warm", confidence: 0.5, probabilities: { warm: 0.81 } } });
+  assert.deepEqual(s.moods, [{ key: "warm", pct: 81 }]);
 });
 
 test("signature changes when the last messages change", () => {

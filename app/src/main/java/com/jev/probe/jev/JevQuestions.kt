@@ -43,14 +43,18 @@ object JevQuestions {
     fun judge(): JSONObject = JSONObject().apply {
         put("mood", choice(
             "What is the other person's mood across these messages? Weight the latest line most, " +
-                "and use earlier lines for tone. Pick the single closest fit.",
+                "and use earlier lines for tone. Pick the single closest fit. " +
+                "Only choose a mood the messages support from wording, tone, and what they did — " +
+                "not a guess about their personality.",
             linkedMapOf(
                 "flirty" to "They are teasing, complimenting, or playing along with romantic interest.",
                 "playful" to "They are joking or bantering. Warm, but not clearly flirting back.",
                 "warm" to "Friendly, pleased, or affectionate, without a joke and without a test.",
                 "neutral" to "Plain, practical, or hard to read. No strong feeling either way.",
                 "unsure" to "Hesitant, awkward, or keeping some distance while still replying.",
-                "annoyed" to "Irritated, unimpressed, sarcastic, or shutting a line down.",
+                "frustrated" to "Mild irritation or impatience; annoyed or short, but not openly angry.",
+                "angry" to "Clearly angry and blaming; heat is up, but not exploding.",
+                "furious" to "Intense rage or explosive anger; the hottest, most livid reads.",
                 "hurt" to "Sad, cold, or wounded. The feeling is pain more than irritation."
             )
         ))

@@ -10,9 +10,9 @@
 
 ## Demo
 
-Twenty-two seconds. He tries a parking-ticket line. She is not impressed. Jev reads her mood as a percent, ranks three less-painful replies, and fills the box. Send stays his.
+About fifteen seconds, two analyzes. He tries a parking-ticket line. She is not impressed. Jev ranks safer replies. He course-corrects; she softens; Jev analyzes again with a warmer mood and a real plan. Send stays his.
 
-![Jev reads a chat, ranks three replies, and fills the box without sending](docs/demo.gif)
+![Jev reads a chat twice, ranks replies, and fills the box without sending](docs/demo.gif)
 
 [Play the video](docs/demo.mp4)
 
@@ -54,11 +54,45 @@ Jev does not ship a key. Analysis calls [OpenRouter](https://openrouter.ai/) wit
 | Firefox | Extensions → Jev Assistant → Options. Paste the key into **Judge API key** and save. Firefox does not share Chrome's saved key. |
 | Mac | Menu bar **Jev** → **Set Judge API key…** → Paste → Save. Leave **Set Reply API key** empty to reuse the judge key. |
 
-**3. Analyze a chat.** Leave a conversation in front (a Direct thread, a WhatsApp chat, or Messages). Open Jev and choose Analyze. The panel shows the intent, the risk, and three ranked replies. **Fill** puts the text in the compose box. You send it yourself.
+<p align="center">
+  <img src="docs/images/mac-judge-key.png" width="420" alt="Mac dialog: paste the OpenRouter Judge API key, then Save" /><br/>
+  <em>Mac: Set Judge API key… (fictional key shown)</em>
+</p>
+
+<p align="center">
+  <img src="docs/images/extension-judge-key.png" width="420" alt="Browser extension options: Judge API key field highlighted" /><br/>
+  <em>Chrome / Firefox options: paste into Judge API key</em>
+</p>
+
+**3. Say who they are to you.** That short description is what Jev uses as the other person in the chat (`from=me` is you; `from=other` is them).
+
+| Where you use Jev | Where the relationship goes |
+|---|---|
+| Android | Settings → relationship / contact notes for that person. |
+| Chrome / Firefox | Extension options → **Who is the other person to you?** |
+| Mac | Menu bar **Jev** → **Set relationship…** |
+| Browser paste page | The **Who is the other person to you?** field on [docs/use.html](docs/use.html). |
+
+<p align="center">
+  <img src="docs/images/mac-set-relationship.png" width="420" alt="Mac dialog: Set relationship with a short fictional description of who the other person is" /><br/>
+  <em>Mac: Jev → Set relationship… (fictional text only)</em>
+</p>
+
+**4. Analyze a chat.** Leave a conversation in front (a Direct thread, a WhatsApp chat, or Messages). Open Jev and choose Analyze. The panel shows risk, up to three mood possibilities with percents (spaced so each is easy to scan), and three ranked replies. **Fill** puts the text in the compose box. You send it yourself.
+
+<p align="center">
+  <img src="docs/images/mac-panel-moods.png" width="360" alt="Mac Jev panel showing Risk, three spaced moods with percents, and three ranked replies" /><br/>
+  <em>Mac panel: three spaced moods + ranked replies (fictional chat)</em>
+</p>
+
+<p align="center">
+  <img src="docs/images/browser-paste-analyze.png" width="420" alt="Browser paste page with OpenRouter key field, fictional chat, spaced moods, and Copy buttons" /><br/>
+  <em>Browser paste page after Analyze (fictional chat only)</em>
+</p>
 
 The default judge and reply models are paid OpenRouter models. To spend less, change the model id in settings to one ending in `:free`. An empty Reply key always reuses the Judge key.
 
-The panel now includes her **mood** and how sure Jev is, for example `Mood: playful 64%`. That percent is the model's probability for the closest mood, judged from the messages with the latest line weighted most.
+The panel lists up to three **mood** possibilities, highest first, each with a percent — for example `Angry 70%`, `Furious 20%`, `Frustrated 10%` on separate spaced items, not one clutched string. That percent is the model's probability for that mood, judged from the messages with the latest line weighted most.
 
 ## Phone or Windows, no install
 
@@ -101,7 +135,17 @@ The extension is the same folder for Chrome and Firefox. It reads WhatsApp Web, 
 
 **Chrome.** Open `chrome://extensions`, turn on Developer mode, choose **Load unpacked**, and select the `extension/` folder. Click the Jev toolbar icon to open the side panel.
 
+<p align="center">
+  <img src="docs/images/chrome-extensions.png" width="520" alt="Chrome extensions page with Developer mode on and Load unpacked" /><br/>
+  <em>Chrome: Developer mode → Load unpacked → select <code>extension/</code></em>
+</p>
+
 **Firefox.** Open `about:debugging#/runtime/this-firefox`, choose **Load Temporary Add-on…**, and pick `extension/manifest.json`. A temporary add-on is removed when Firefox quits. Load that file again after a restart. Click the Jev toolbar icon to open the sidebar.
+
+<p align="center">
+  <img src="docs/images/firefox-temp-addon.png" width="480" alt="Firefox debugging page with Load Temporary Add-on for Jev" /><br/>
+  <em>Firefox: Load Temporary Add-on… → <code>extension/manifest.json</code></em>
+</p>
 
 Paste the OpenRouter key in the extension options, as in [Connect an OpenRouter API key](#connect-an-openrouter-api-key). Leave the Reply key blank to reuse it.
 
@@ -120,6 +164,13 @@ bash mac/package.sh
 ```
 
 Open `mac/build/Jev Assistant.app`. A **Jev** item appears in the menu bar. Grant Accessibility under System Settings → Privacy & Security → Accessibility, then set the Judge API key from the Jev menu. Each rebuild changes the ad-hoc signature, so macOS may ask for Accessibility again.
+
+<p align="center">
+  <img src="docs/images/mac-app-build.png" width="480" alt="Build Jev Assistant.app with bash mac/package.sh, then open mac/build/Jev Assistant.app" /><br/>
+  <em>Mac install path: <code>bash mac/package.sh</code> → open <code>mac/build/Jev Assistant.app</code></em>
+</p>
+
+Describe your relationship with that person under **Jev → Set relationship…** (see the screenshots in [Connect an OpenRouter API key](#connect-an-openrouter-api-key)). Then bring Messages or WhatsApp Desktop to the front and choose **Analyze now**.
 
 The menu bar follows Messages and WhatsApp Desktop only. Switching to another app stops the current analysis. Instagram is the browser extension.
 

@@ -10,6 +10,7 @@ Hand-written Accessibility trees for `MessagesApp.parse`. Roles and layout are *
 | `messages_no_convo.json` | Sidebar + search only — no composer → `parse` returns `nil`. |
 | `messages_unreadable.json` | Composer present but empty transcript → `parse` returns empty messages. |
 | `messages_tahoe.json` | Live Sequoia/Tahoe shape: `TranscriptCollectionView` + editable `CKBalloonTextView` + `messageBodyField`. |
+| `messages_wide_window.json` | Wide AX transcript with a gutter past the balloon column; left = other, right-aligned = me; centered emoji must not flip sides. Fake short lines only. |
 
 ## Expected roles (parser assumptions)
 
@@ -18,7 +19,7 @@ Hand-written Accessibility trees for `MessagesApp.parse`. Roles and layout are *
 - Bubbles: `CKBalloonTextView` (editable on Tahoe) or non-editable `AXTextArea`.
 - Header: `ConversationTitle` button, or `AXStaticText` above the transcript.
 - Composer: `messageBodyField`, never a balloon or `AXSearchField`.
-- Side: left vs right edge of each bubble within the transcript width (`sideByEdges`).
+- Side: outgoing balloons share a trailing (right) edge inside the column → `me`; leading (left) balloons → `other`. Window width is not used (`sidesByBalloonEdges`). Emoji-only stickers inherit a neighbor's side and do not define the trailing edge.
 
 ## Real dumps — pending owner
 

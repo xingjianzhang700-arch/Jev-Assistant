@@ -1,0 +1,19 @@
+{"role": "AXWindow", "x": 80, "y": 40, "w": 1400, "h": 900, "children": [
+  {"role": "AXButton", "identifier": "ConversationTitle", "value": "Pat", "x": 520, "y": 60, "w": 40, "h": 24},
+  {"role": "AXTextField", "subrole": "AXSearchField", "editable": true, "x": 90, "y": 90, "w": 220, "h": 28},
+  {"role": "AXGroup", "identifier": "TranscriptCollectionView", "x": 80, "y": 50, "w": 1400, "h": 780, "children": [
+    {"role": "AXGroup", "identifier": "Sticker", "x": 120, "y": 140, "w": 260, "h": 32, "children": [
+      {"role": "AXTextArea", "identifier": "CKBalloonTextView", "editable": true, "value": "proofs again?", "x": 128, "y": 140, "w": 240, "h": 28}]},
+    {"role": "AXGroup", "identifier": "Sticker", "x": 980, "y": 190, "w": 120, "h": 32, "children": [
+      {"role": "AXTextArea", "identifier": "CKBalloonTextView", "editable": true, "value": "yeah toast", "x": 988, "y": 190, "w": 100, "h": 28}]},
+    {"role": "AXGroup", "identifier": "Sticker", "x": 520, "y": 250, "w": 80, "h": 80, "children": [
+      {"role": "AXTextArea", "identifier": "CKBalloonTextView", "editable": true, "value": "😂", "x": 540, "y": 260, "w": 48, "h": 48}]},
+    {"role": "AXGroup", "identifier": "Sticker", "x": 900, "y": 350, "w": 200, "h": 32, "children": [
+      {"role": "AXTextArea", "identifier": "CKBalloonTextView", "editable": true, "value": "try the demo track", "x": 908, "y": 350, "w": 180, "h": 28}]},
+    {"role": "AXGroup", "identifier": "Sticker", "x": 820, "y": 400, "w": 280, "h": 32, "children": [
+      {"role": "AXTextArea", "identifier": "CKBalloonTextView", "editable": true, "value": "I am drilling basics", "x": 828, "y": 400, "w": 260, "h": 28}]}
+  ]},
+  {"role": "AXGroup", "identifier": "MessageEntryView", "x": 200, "y": 840, "w": 900, "h": 40, "children": [
+    {"role": "AXTextField", "identifier": "messageBodyField", "editable": true, "x": 220, "y": 840, "w": 800, "h": 30}
+  ]}
+]}

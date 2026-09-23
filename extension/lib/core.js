@@ -87,7 +87,31 @@ export function moodPercent(answer) {
   return Number.isFinite(n) ? Math.round(n * 100) : null;
 }
 
+/** Top moods by probability (highest first). Falls back to choice+confidence if no map. */
+export function topMoods(answer, limit = 3) {
+  if (!answer) return [];
+  const probs = answer.probabilities;
+  let entries = [];
+  if (probs && typeof probs === "object") {
+    entries = Object.entries(probs)
+      .map(([k, v]) => [k, Number(v)])
+      .filter(([, n]) => Number.isFinite(n))
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, limit);
+  }
+  if (!entries.length && answer.choice) {
+    const raw = answer.confidence;
+    const n = Number(raw);
+    entries = [[answer.choice, Number.isFinite(n) ? n : null]];
+  }
+  return entries.map(([key, n]) => ({
+    key,
+    pct: n == null ? null : Math.round(n * 100),
+  }));
+}
+
 export function summarize(a) {
+  const moods = topMoods(a.mood);
   return {
     intent: a.true_intent?.choice ?? null,
     intentConfidence: a.true_intent?.confidence ?? null,
@@ -96,7 +120,8 @@ export function summarize(a) {
     bestAction: a.best_action?.choice ?? null,
     specificsOk: a.should_reply_now?.noul ?? null,
     tensionResolved: a.tension_resolved?.noul ?? null,
-    mood: a.mood?.choice ?? null,
-    moodPct: moodPercent(a.mood),
+    mood: moods[0]?.key ?? null,
+    moodPct: moods[0]?.pct ?? null,
+    moods,
   };
 }

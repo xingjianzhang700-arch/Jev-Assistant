@@ -65,13 +65,30 @@ public enum Prompt {
     public static func summary(_ a: [String: Any]) -> Summary {
         func obj(_ k: String) -> [String: Any]? { a[k] as? [String: Any] }
         func num(_ k: String, _ f: String) -> Double? { (obj(k)?[f] as? NSNumber)?.doubleValue }
-        let mood = obj("mood")
-        let moodChoice = mood?["choice"] as? String
-        let moodProbs = mood?["probabilities"] as? [String: Any]
-        let moodRaw = moodChoice.flatMap { moodProbs?[$0] as? NSNumber } ?? mood?["confidence"] as? NSNumber
+        let moods = topMoods(obj("mood"))
         return Summary(intent: obj("true_intent")?["choice"] as? String, risk: num("danger_level", "score"),
                        needs: obj("she_needs")?["choice"] as? String, bestAction: obj("best_action")?["choice"] as? String,
                        specificsOk: num("should_reply_now", "noul"), tensionResolved: num("tension_resolved", "noul"),
-                       mood: moodChoice, moodPct: moodRaw.map { Int(($0.doubleValue * 100).rounded()) })
+                       mood: moods.first?.key, moodPct: moods.first?.pct, moods: moods)
+    }
+
+    /// Top moods by probability (highest first). Falls back to choice+confidence if no map.
+    public static func topMoods(_ mood: [String: Any]?, limit: Int = 3) -> [MoodGuess] {
+        guard let mood else { return [] }
+        var entries: [(String, Double?)] = []
+        if let probs = mood["probabilities"] as? [String: Any] {
+            entries = probs.compactMap { key, raw -> (String, Double?)? in
+                guard let n = (raw as? NSNumber)?.doubleValue else { return nil }
+                return (key, n)
+            }
+            .sorted { ($0.1 ?? -1) > ($1.1 ?? -1) }
+            .prefix(limit)
+            .map { ($0.0, $0.1) }
+        }
+        if entries.isEmpty, let choice = mood["choice"] as? String {
+            let n = (mood["confidence"] as? NSNumber)?.doubleValue
+            entries = [(choice, n)]
+        }
+        return entries.map { MoodGuess($0.0, $0.1.map { Int(($0 * 100).rounded()) }) }
     }
 }

@@ -38,9 +38,15 @@ final class ReplyPanel {
             let n = Int(r.rounded())
             views.append(label("Risk \(n) / 9", bold: true, size: 16, color: Self.riskColor(n)))
         }
-        if let m = s.mood {
-            let pct = s.moodPct.map { " \($0)%" } ?? ""
-            views.append(label("Mood: \(brainLabel("mood", m))\(pct)", bold: true))
+        if !s.moods.isEmpty {
+            views.append(moodRow(s.moods.map { m -> String in
+                let name = brainLabel("mood", m.key)
+                if let pct = m.pct { return "\(name) \(pct)%" }
+                return name
+            }))
+        } else if let m = s.mood {
+            let pct = s.moodPct.map { "\(brainLabel("mood", m)) \($0)%" } ?? brainLabel("mood", m)
+            views.append(moodRow([pct]))
         }
         if let i = s.intent { views.append(label("Their real intent: \(brainLabel("intent", i))", bold: true)) }
         var bits: [String] = []
@@ -52,6 +58,12 @@ final class ReplyPanel {
         views.append(label("Suggested replies", size: 12, color: Self.muted))
         views.append(contentsOf: replies.map(replyRow))
         set(views)
+    }
+
+    /// Separate non-wrapping mood chips with ≥16pt gaps — never one clutched string.
+    private func moodRow(_ parts: [String]) -> NSView {
+        let chips = (["Mood:"] + parts).map { plainLabel($0, bold: true) }
+        return MoodStrip(labels: chips, spacing: 16)
     }
 
     private func replyRow(_ r: RankedReply) -> NSView {
@@ -76,6 +88,17 @@ final class ReplyPanel {
         b.controlSize = .small
         b.font = .systemFont(ofSize: 12)
         return b
+    }
+
+    private func plainLabel(_ s: String, bold: Bool = false, size: CGFloat = 13, color: NSColor? = nil) -> NSTextField {
+        let l = NSTextField(labelWithString: s)
+        l.font = bold ? .boldSystemFont(ofSize: size) : .systemFont(ofSize: size)
+        l.textColor = color ?? Self.ink
+        l.maximumNumberOfLines = 1
+        l.lineBreakMode = .byClipping
+        l.setContentHuggingPriority(.required, for: .horizontal)
+        l.setContentCompressionResistancePriority(.required, for: .horizontal)
+        return l
     }
 
     private func label(_ s: String, bold: Bool = false, size: CGFloat = 13, color: NSColor? = nil) -> NSTextField {
@@ -111,11 +134,32 @@ final class ReplyPanel {
 
     private func measure(_ v: NSView, width: CGFloat) -> CGFloat {
         if let card = v as? ReplyCard { return card.measure(width: width) }
+        if let strip = v as? MoodStrip { return strip.measure(width: width) }
+        if let stack = v as? NSStackView {
+            stack.frame.size.width = width
+            return max(ceil(stack.fittingSize.height), 16)
+        }
         if let l = v as? NSTextField {
             l.preferredMaxLayoutWidth = width
             return max(ceil(l.intrinsicContentSize.height), 16)
         }
         return 20
+    }
+
+    /// Writes the panel contents to a PNG (used by `--preview` for docs screenshots).
+    func writePNG(to path: String) -> Bool {
+        column.layoutSubtreeIfNeeded()
+        let bounds = column.bounds
+        guard bounds.width > 1, bounds.height > 1,
+              let rep = column.bitmapImageRepForCachingDisplay(in: bounds) else { return false }
+        column.cacheDisplay(in: bounds, to: rep)
+        guard let data = rep.representation(using: .png, properties: [:]) else { return false }
+        do {
+            try data.write(to: URL(fileURLWithPath: path))
+            return true
+        } catch {
+            return false
+        }
     }
 
     private func bringUp() {
@@ -141,6 +185,71 @@ final class ReplyPanel {
         if n >= 6 { return NSColor(srgbRed: 0.93, green: 0.34, blue: 0.31, alpha: 1) }
         if n >= 3 { return NSColor(srgbRed: 0.93, green: 0.62, blue: 0.18, alpha: 1) }
         return NSColor(srgbRed: 0.25, green: 0.75, blue: 0.42, alpha: 1)
+    }
+}
+
+/// Horizontal mood chips with a fixed gap — layout is frame-based so spacing survives PNG capture.
+/// Wraps rather than clutching when three moods do not fit on one row of the 360pt panel.
+final class MoodStrip: NSView {
+    private let labels: [NSTextField]
+    private let spacing: CGFloat
+    private var contentHeight: CGFloat = 16
+
+    init(labels: [NSTextField], spacing: CGFloat) {
+        self.labels = labels
+        self.spacing = spacing
+        super.init(frame: .zero)
+        labels.forEach(addSubview)
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    func measure(width: CGFloat) -> CGFloat {
+        layout(width: width)
+        return contentHeight
+    }
+
+    override func layout() {
+        super.layout()
+        layout(width: bounds.width)
+    }
+
+    private func layout(width: CGFloat) {
+        // AppKit y grows up; place the first row at the top of this strip.
+        var rows: [[(NSTextField, CGFloat, CGFloat)]] = [[]]
+        var rowWidths: [CGFloat] = [0]
+        var rowHeights: [CGFloat] = [16]
+        for lab in labels {
+            let size = lab.intrinsicContentSize
+            let w = ceil(size.width)
+            let h = max(ceil(size.height), 16)
+            let idx = rows.count - 1
+            let used = rowWidths[idx]
+            let next = used == 0 ? w : used + spacing + w
+            if used > 0, next > width {
+                rows.append([(lab, w, h)])
+                rowWidths.append(w)
+                rowHeights.append(h)
+            } else {
+                rows[idx].append((lab, w, h))
+                rowWidths[idx] = next
+                rowHeights[idx] = max(rowHeights[idx], h)
+            }
+        }
+        let totalH = rowHeights.reduce(0, +) + spacing * CGFloat(max(rows.count - 1, 0))
+        contentHeight = max(totalH, 16)
+        var top = totalH
+        for (r, row) in rows.enumerated() {
+            let rowH = rowHeights[r]
+            top -= rowH
+            var x: CGFloat = 0
+            for (i, item) in row.enumerated() {
+                if i > 0 { x += spacing }
+                item.0.frame = NSRect(x: x, y: top, width: item.1, height: item.2)
+                x += item.1
+            }
+            if r + 1 < rows.count { top -= spacing }
+        }
     }
 }
 

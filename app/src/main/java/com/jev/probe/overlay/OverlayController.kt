@@ -404,9 +404,20 @@ class OverlayController(private val ctx: Context) {
             tintBubbleDanger(it.score)
         }
         // Intent headline.
-        a.mood?.let {
-            val pct = ((it.probabilities[it.choice] ?: it.confidence) * 100).roundToInt()
-            views.add(line("Mood: ${MOOD[it.choice] ?: it.choice} $pct%", "#111827", 15f, true))
+        a.mood?.let { choice ->
+            val top = choice.probabilities.entries
+                .sortedByDescending { it.value }
+                .take(3)
+            val parts = if (top.isNotEmpty()) {
+                top.map { (key, p) ->
+                    val name = MOOD[key] ?: key
+                    "$name ${(p * 100).roundToInt()}%"
+                }
+            } else {
+                val pct = ((choice.confidence) * 100).roundToInt()
+                listOf("${MOOD[choice.choice] ?: choice.choice} $pct%")
+            }
+            views.add(moodRow(parts))
         }
         a.trueIntent?.let {
             views.add(line("Their real intent: ${INTENT[it.choice] ?: it.choice}", "#111827", 15f, true))
@@ -521,6 +532,34 @@ class OverlayController(private val ctx: Context) {
             setPadding(0, dp(2), 0, dp(2))
         }
 
+    /** Three mood possibilities with ≥16dp gaps — never one clutched string. */
+    private fun moodRow(parts: List<String>): View {
+        val row = LinearLayout(ctx).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, dp(2), 0, dp(2))
+        }
+        row.addView(TextView(ctx).apply {
+            text = "Mood:"
+            setTextColor(Color.parseColor("#111827"))
+            textSize = 15f
+            setTypeface(typeface, Typeface.BOLD)
+        })
+        for (part in parts) {
+            row.addView(TextView(ctx).apply {
+                text = part
+                setTextColor(Color.parseColor("#111827"))
+                textSize = 15f
+                setTypeface(typeface, Typeface.BOLD)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { marginStart = dp(16) }
+            })
+        }
+        return row
+    }
+
     private fun hint(text: String) = line(text, "#9CA3AF", 12f)
 
     private fun divider() = View(ctx).apply {
@@ -551,8 +590,9 @@ class OverlayController(private val ctx: Context) {
 
     companion object {
         private val MOOD = mapOf(
-            "flirty" to "flirty", "playful" to "playful", "warm" to "warm", "neutral" to "neutral",
-            "unsure" to "unsure", "annoyed" to "annoyed", "hurt" to "hurt")
+            "flirty" to "Flirty", "playful" to "Playful", "warm" to "Warm", "neutral" to "Neutral",
+            "unsure" to "Unsure", "frustrated" to "Frustrated", "angry" to "Angry",
+            "furious" to "Furious", "hurt" to "Hurt")
         private val INTENT = mapOf(
             "confirm_you_care" to "checking you care", "vent_anger" to "venting",
             "request_action" to "wants action", "seek_explanation" to "wants an explanation",
