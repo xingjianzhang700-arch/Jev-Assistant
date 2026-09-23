@@ -17,6 +17,7 @@ public struct Snapshot: Equatable {
 public struct RankedReply: Equatable {
     public let text: String
     public let prob: Double
+    public init(text: String, prob: Double) { self.text = text; self.prob = prob }
 }
 
 public struct Summary: Equatable {

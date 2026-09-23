@@ -6,22 +6,19 @@ import JevCore
 final class ReplyPanel {
     var onFill: ((String) -> Void)?
     private let panel: NSPanel
-    private let stack = NSStackView()
+    private let column = NSView()
     private var targets: [ClosureTarget] = []
 
     init() {
-        panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 340, height: 420),
+        panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 360, height: 240),
                         styleMask: [.titled, .closable, .utilityWindow, .nonactivatingPanel],
                         backing: .buffered, defer: true)
         panel.title = "Jev"
         panel.level = .floating
         panel.isFloatingPanel = true
         panel.hidesOnDeactivate = false
-        stack.orientation = .vertical
-        stack.alignment = .leading
-        stack.spacing = 8
-        stack.edgeInsets = NSEdgeInsets(top: 12, left: 12, bottom: 12, right: 12)
-        panel.contentView = stack
+        panel.isMovableByWindowBackground = true
+        panel.contentView = column
     }
 
     func show(title: String?) {
@@ -29,27 +26,30 @@ final class ReplyPanel {
         bringUp()
     }
 
-    func status(_ text: String) { set([label(text, secondary: true)]) }
+    func status(_ text: String) { set([label(text, color: Self.muted)]) }
 
-    func error(_ text: String) { set([label("Something went wrong", bold: true), label(text, secondary: true)]) }
+    func error(_ text: String) { set([label("Something went wrong", bold: true), label(text, color: Self.muted)]) }
 
     func show(summary s: Summary, replies: [RankedReply]) {
         // Old buttons disappear in set(); buttons hold targets weakly, so we keep the live ones.
         targets.removeAll()
         var views: [NSView] = []
+        if let r = s.risk {
+            let n = Int(r.rounded())
+            views.append(label("Risk \(n) / 9", bold: true, size: 16, color: Self.riskColor(n)))
+        }
         if let m = s.mood {
             let pct = s.moodPct.map { " \($0)%" } ?? ""
             views.append(label("Mood: \(brainLabel("mood", m))\(pct)", bold: true))
         }
         if let i = s.intent { views.append(label("Their real intent: \(brainLabel("intent", i))", bold: true)) }
         var bits: [String] = []
-        if let r = s.risk { bits.append("Risk \(Int(r.rounded()))/9") }
         if let n = s.needs { bits.append("Needs \(brainLabel("needs", n))") }
         if let a = s.bestAction { bits.append(brainLabel("action", a)) }
         if let ok = s.specificsOk { bits.append(ok >= 0.5 ? "OK to give specifics" : "Hold off on specifics") }
-        if !bits.isEmpty { views.append(label(bits.joined(separator: " · "), secondary: true)) }
-        if let t = s.tensionResolved, t >= 0.7 { views.append(label("✓ Tension resolved", secondary: true)) }
-        views.append(label("Suggested replies (ranked by Jev)", secondary: true))
+        if !bits.isEmpty { views.append(label(bits.joined(separator: " · "), size: 12, color: Self.muted)) }
+        if let t = s.tensionResolved, t >= 0.7 { views.append(label("✓ Tension resolved", size: 12, color: Self.ok)) }
+        views.append(label("Suggested replies", size: 12, color: Self.muted))
         views.append(contentsOf: replies.map(replyRow))
         set(views)
     }
@@ -61,35 +61,154 @@ final class ReplyPanel {
             NSPasteboard.general.setString(r.text, forType: .string)
         }
         let buttons = NSStackView(views: [fill, copy])
-        let row = NSStackView(views: [label("\(Int((r.prob * 100).rounded()))%  \(r.text)"), buttons])
-        row.orientation = .vertical
-        row.alignment = .leading
-        return row
+        buttons.orientation = .horizontal
+        buttons.spacing = 8
+        let pct = label("\(Int((r.prob * 100).rounded()))%", bold: true, size: 13, color: Self.cyan)
+        let body = label(r.text, size: 13)
+        return ReplyCard(pct: pct, body: body, buttons: buttons)
     }
 
     private func button(_ title: String, _ action: @escaping () -> Void) -> NSButton {
         let t = ClosureTarget(action)
         targets.append(t)
-        return NSButton(title: title, target: t, action: #selector(ClosureTarget.run))
+        let b = NSButton(title: title, target: t, action: #selector(ClosureTarget.run))
+        b.bezelStyle = .rounded
+        b.controlSize = .small
+        b.font = .systemFont(ofSize: 12)
+        return b
     }
 
-    private func label(_ s: String, bold: Bool = false, secondary: Bool = false) -> NSTextField {
+    private func label(_ s: String, bold: Bool = false, size: CGFloat = 13, color: NSColor? = nil) -> NSTextField {
         let l = NSTextField(wrappingLabelWithString: s)
-        l.preferredMaxLayoutWidth = 310
-        if bold { l.font = .boldSystemFont(ofSize: 13) }
-        if secondary { l.textColor = .secondaryLabelColor }
+        l.font = bold ? .boldSystemFont(ofSize: size) : .systemFont(ofSize: size)
+        l.textColor = color ?? Self.ink
         return l
     }
 
     private func set(_ views: [NSView]) {
-        stack.setViews(views, in: .top)
+        column.subviews.forEach { $0.removeFromSuperview() }
+        let width: CGFloat = 360
+        let pad: CGFloat = 14
+        let gap: CGFloat = 8
+        let innerW = width - pad * 2
+        let heights = views.map { measure($0, width: innerW) }
+        let total = pad * 2 + heights.reduce(0, +) + gap * CGFloat(max(heights.count - 1, 0))
+        let maxH = (NSScreen.main?.visibleFrame.height ?? 800) - 48
+        panel.setContentSize(NSSize(width: width, height: min(total, maxH)))
+        column.frame = NSRect(x: 0, y: 0, width: width, height: panel.contentView?.bounds.height ?? total)
+        // AppKit's origin is the bottom. Place the first row at the top.
+        var y = column.bounds.height - pad
+        for (v, h) in zip(views, heights) {
+            y -= h
+            v.frame = NSRect(x: pad, y: y, width: innerW, height: h)
+            column.addSubview(v)
+            y -= gap
+        }
+        column.needsLayout = true
+        column.layoutSubtreeIfNeeded()
         bringUp()
+    }
+
+    private func measure(_ v: NSView, width: CGFloat) -> CGFloat {
+        if let card = v as? ReplyCard { return card.measure(width: width) }
+        if let l = v as? NSTextField {
+            l.preferredMaxLayoutWidth = width
+            return max(ceil(l.intrinsicContentSize.height), 16)
+        }
+        return 20
     }
 
     private func bringUp() {
         guard !panel.isVisible else { return }
-        if let f = NSScreen.main?.visibleFrame { panel.setFrameTopLeftPoint(NSPoint(x: f.maxX - 360, y: f.maxY - 20)) }
+        if let f = NSScreen.main?.visibleFrame { panel.setFrameTopLeftPoint(NSPoint(x: f.maxX - 380, y: f.maxY - 20)) }
         panel.orderFront(nil)
+    }
+
+    private static let ink = NSColor(name: "jevInk", dynamicProvider: { a in
+        a.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            ? NSColor(srgbRed: 0.93, green: 0.94, blue: 0.96, alpha: 1)
+            : NSColor(srgbRed: 0.09, green: 0.11, blue: 0.14, alpha: 1)
+    })
+    private static let muted = NSColor(name: "jevMuted", dynamicProvider: { a in
+        a.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+            ? NSColor(srgbRed: 0.68, green: 0.73, blue: 0.78, alpha: 1)
+            : NSColor(srgbRed: 0.33, green: 0.38, blue: 0.44, alpha: 1)
+    })
+    private static let cyan = NSColor(srgbRed: 0.18, green: 0.75, blue: 0.70, alpha: 1)
+    private static let ok = NSColor(srgbRed: 0.25, green: 0.72, blue: 0.42, alpha: 1)
+
+    private static func riskColor(_ n: Int) -> NSColor {
+        if n >= 6 { return NSColor(srgbRed: 0.93, green: 0.34, blue: 0.31, alpha: 1) }
+        if n >= 3 { return NSColor(srgbRed: 0.93, green: 0.62, blue: 0.18, alpha: 1) }
+        return NSColor(srgbRed: 0.25, green: 0.75, blue: 0.42, alpha: 1)
+    }
+}
+
+/// One reply: percent, text, Fill / Copy. Height is measured, never stretched.
+final class ReplyCard: NSView {
+    let pct: NSTextField
+    let body: NSTextField
+    let buttons: NSStackView
+
+    init(pct: NSTextField, body: NSTextField, buttons: NSStackView) {
+        self.pct = pct
+        self.body = body
+        self.buttons = buttons
+        super.init(frame: .zero)
+        addSubview(pct)
+        addSubview(body)
+        addSubview(buttons)
+    }
+
+    required init?(coder: NSCoder) { nil }
+
+    func measure(width: CGFloat) -> CGFloat {
+        let textW = width - 20
+        pct.preferredMaxLayoutWidth = textW
+        body.preferredMaxLayoutWidth = textW
+        let p = ceil(pct.intrinsicContentSize.height)
+        let b = ceil(body.intrinsicContentSize.height)
+        let btn = max(ceil(buttons.fittingSize.height), 24)
+        return 8 + p + 4 + b + 6 + btn + 8
+    }
+
+    override func draw(_ dirtyRect: NSRect) {
+        let dark = effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+        let fill = dark
+            ? NSColor(srgbRed: 0.16, green: 0.18, blue: 0.22, alpha: 1)
+            : NSColor(srgbRed: 0.95, green: 0.96, blue: 0.97, alpha: 1)
+        let stroke = dark ? NSColor.white.withAlphaComponent(0.14) : NSColor.black.withAlphaComponent(0.1)
+        let path = NSBezierPath(roundedRect: bounds.insetBy(dx: 0.5, dy: 0.5), xRadius: 10, yRadius: 10)
+        fill.setFill()
+        path.fill()
+        stroke.setStroke()
+        path.lineWidth = 1
+        path.stroke()
+    }
+
+    override func layout() {
+        super.layout()
+        let textW = bounds.width - 20
+        pct.preferredMaxLayoutWidth = textW
+        body.preferredMaxLayoutWidth = textW
+        var y = bounds.height - 8
+        let p = ceil(pct.intrinsicContentSize.height)
+        y -= p
+        pct.frame = NSRect(x: 10, y: y, width: textW, height: p)
+        y -= 4
+        let b = ceil(body.intrinsicContentSize.height)
+        y -= b
+        body.frame = NSRect(x: 10, y: y, width: textW, height: b)
+        y -= 6
+        let btnH = max(ceil(buttons.fittingSize.height), 24)
+        let btnW = max(ceil(buttons.fittingSize.width), 120)
+        y -= btnH
+        buttons.frame = NSRect(x: 10, y: max(y, 8), width: btnW, height: btnH)
+    }
+
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        needsLayout = true
     }
 }
 

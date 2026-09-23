@@ -36,11 +36,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(NSMenuItem(title: "Quit Jev", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         status.menu = menu
 
+        let preview = CommandLine.arguments.contains("--preview")
         // Shows the system prompt once; the user grants access in System Settings.
-        let opts = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
-        _ = AXIsProcessTrustedWithOptions(opts)
+        if !preview {
+            let opts = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true] as CFDictionary
+            _ = AXIsProcessTrustedWithOptions(opts)
+        }
 
-        if !UserDefaults.standard.bool(forKey: "didShowMenuHint") {
+        if preview {
+            panel.show(summary: Summary(
+                intent: "close_topic", risk: 0, needs: "nothing", bestAction: "make_plan",
+                specificsOk: 0.2, tensionResolved: 0.9, mood: "playful", moodPct: 64),
+                replies: [
+                    RankedReply(text: "Got it. Want me to snag both our tickets tomorrow? We can settle up after.", prob: 0.51),
+                    RankedReply(text: "Sweet, thanks for the info. I'll grab mine soon. You heading home after the gym?", prob: 0.44),
+                    RankedReply(text: "Cool cool. Good workout?", prob: 0.05),
+                ])
+        }
+
+        if !preview && !UserDefaults.standard.bool(forKey: "didShowMenuHint") {
             UserDefaults.standard.set(true, forKey: "didShowMenuHint")
             let hint = NSAlert()
             hint.messageText = "Jev is in the menu bar"
@@ -145,12 +159,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func analyze(_ s: Snapshot) {
         guard !busy else { return }
-        let judgeKey = Keychain.get("judge")
+        let judgeKey = Settings.judgeKey
         guard !judgeKey.isEmpty else {
             panel.error("No Judge API key set. Choose Set Judge API key… in the Jev menu.")
             return
         }
-        let stored = Keychain.get("reply")
+        let stored = Settings.replyKey
         let replyKey = stored.isEmpty ? judgeKey : stored
         let rel = Settings.relationship
         busy = true
@@ -232,8 +246,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
-    @objc private func setJudgeKey() { if let v = ask("Judge API key (OpenRouter). Empty clears it.", "", secure: true) { Keychain.set("judge", v) } }
-    @objc private func setReplyKey() { if let v = ask("Reply API key. Empty reuses the Judge key.", "", secure: true) { Keychain.set("reply", v) } }
+    @objc private func setJudgeKey() { if let v = ask("Judge API key (OpenRouter). Empty clears it.", "", secure: true) { Settings.judgeKey = v } }
+    @objc private func setReplyKey() { if let v = ask("Reply API key. Empty reuses the Judge key.", "", secure: true) { Settings.replyKey = v } }
     @objc private func setRelationship() {
         if let v = ask("Who is the other person to you?", Settings.relationship, secure: false), !v.isEmpty { Settings.relationship = v }
     }

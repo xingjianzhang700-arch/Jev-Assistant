@@ -1,4 +1,5 @@
 import Foundation
+import LocalAuthentication
 import Security
 
 /// API keys live only here (generic passwords, service com.jev.assistant.mac).
@@ -11,11 +12,18 @@ enum Keychain {
          kSecAttrAccount as String: account]
     }
 
-    static func get(_ account: String) -> String {
+    /// "" when nothing is stored. nil when macOS would have shown the login-password
+    /// dialog: this build is not on the item's access list, and we refuse that prompt.
+    static func get(_ account: String) -> String? {
+        let context = LAContext()
+        context.interactionNotAllowed = true
         var q = query(account)
         q[kSecReturnData as String] = true
+        q[kSecUseAuthenticationContext as String] = context
         var out: CFTypeRef?
-        guard SecItemCopyMatching(q as CFDictionary, &out) == errSecSuccess, let d = out as? Data else { return "" }
+        let status = SecItemCopyMatching(q as CFDictionary, &out)
+        if status == errSecItemNotFound { return "" }
+        guard status == errSecSuccess, let d = out as? Data else { return nil }
         return String(decoding: d, as: UTF8.self)
     }
 
