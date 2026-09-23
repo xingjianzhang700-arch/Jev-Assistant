@@ -1,211 +1,191 @@
 <div align="center">
 
-<img src="docs/images/logo.png" width="150" alt="Jev Chat Assistant" />
+<img src="docs/images/logo.png" width="150" alt="Jev Assistant" />
 
-# Jev Chat Assistant
+# Jev Assistant
 
-**A conversation copilot: in WhatsApp, Snapchat, Instagram, and SMS it reads the other person, suggests replies, and fills the input box in one tap. Whether to send is up to you. Non-invasive: it only reads the screen, with no hooking and no app modification.**
+**Jev reads the open chat, judges what the other person wants, and suggests three replies. You choose one. Jev fills the box. You press send.**
 
 </div>
 
-## Why use it
+## Demo
 
-- **It judges before it writes.** Most tools just let a model make up a reply on the spot. Jev first uses a judgment model to work out the other person's real intent, the risk level, and whether to reply right now — then drafts a reply based on that.
-- **It doesn't touch your chat app.** No hooking, no repackaging, no calling any app's private API or accessing its account system, no reading its database — it only uses the system accessibility service (or a browser content script) to read the conversation currently on screen.
-- **The send button is always yours.** The program only fills a reply into the input box; it never sends automatically.
-- **One core, many platforms.** WhatsApp, Snapchat, Instagram, and SMS/RCS work on Android; the Chrome/Firefox extension covers the same sites on a laptop; the Mac menu-bar app covers Apple Messages and WhatsApp Desktop.
-- **It knows your people and your context.** A local knowledge base and contact profiles are automatically pulled in during analysis — matching notes and that person's history — so replies won't contradict what you've told it.
-- **You configure the endpoints.** Judge / reply / vision are each configurable separately, using your own key and quota, with no middle server in between.
-- **Privacy stays on-device.** Keys are stored in the app's private storage; chat content is only sent to your configured endpoint at the moment you trigger an analysis — nothing is written to disk or logged.
+Nine seconds, fictional chat. Jev reads the thread, names the intent and risk, ranks three replies, and fills the box. The Send button is never pressed.
 
-## Supported apps
+![Jev reads a chat, ranks three replies, and fills the box without sending](docs/demo.gif)
 
-| App | Status | Capture method | Notes |
-|---|---|---|---|
-| WhatsApp Android | ✅ full pipeline | Accessibility node reading | Expected view ids, not yet verified on a device. Business app (`com.whatsapp.w4b`) uses the same reader |
-| Snapchat Android | ✅ full pipeline | Accessibility node reading | Expected view ids, not yet verified on a device |
-| Instagram | ✅ full pipeline | Accessibility node reading | DMs, real device |
-| Google Messages (SMS/RCS) | ✅ full pipeline | Accessibility node reading | SMS/RCS threads, real device |
-| QQ Android | ✅ full pipeline | Accessibility node reading | Verified on 9.3.50 (group chat) on real hardware |
-| X / Twitter DMs | ✅ full pipeline | Parses Compose nodes' content-desc | Verified on 12.25 |
-| Feishu / Lark | ✅ OCR fallback | Accessibility bubble rectangles + ML Kit offline OCR | Message body is custom-drawn |
-| Any other app | ✅ manual | Overlay menu "Read screen once (OCR)" | Not automatic; does not distinguish me/them |
-| Desktop / web | ✅ Chrome & Firefox extension + Mac menu bar | DOM / Accessibility | See sections below |
+[Play the video](docs/demo.mp4)
 
-This project only reads chats on your own device that you already have the right to view.
+## Contents
 
-## Quick start
+- [What Jev does](#what-jev-does)
+- [Connect an OpenRouter API key](#connect-an-openrouter-api-key)
+- [Android](#android)
+- [Laptop](#laptop)
+- [Mac](#mac)
+- [Supported chats](#supported-chats)
+- [How a suggestion is made](#how-a-suggestion-is-made)
+- [FAQ](#faq)
+- [Limitations](#limitations)
+- [License](#license)
 
-**1. Install the app.** The repo ships a signed release build: [`apk/jev-assistant-v1.3-release.apk`](apk/jev-assistant-v1.3-release.apk) (Android 11+).
+## What Jev does
+
+- **It judges before it writes.** A judgment model names the other person's intent, the risk, and whether to reply now. A second model drafts three replies. The judgment model ranks them.
+- **It only reads the screen.** No hooking, no repackaging, no private APIs, no reading the chat app's database. Android uses the accessibility service. The browser extension reads the page. The Mac app reads Messages or WhatsApp Desktop through Accessibility.
+- **Sending stays yours.** Fill writes the chosen reply into the compose box, or copies it if the box cannot be written. Jev never presses Send.
+- **Your key, your quota.** Judge, reply, and vision can each use a different endpoint. One OpenRouter key is enough: leave the reply and vision keys blank and they reuse the judge key.
+- **Notes stay on the device.** A local knowledge base and contact notes can be included in an analysis. Chat text is sent only to the endpoint you configured, at the moment you analyze.
+
+## Connect an OpenRouter API key
+
+Jev does not ship a key. Analysis calls [OpenRouter](https://openrouter.ai/) with yours. OpenRouter bills the models against your credit.
+
+**1. Create the key.** Sign in at [openrouter.ai](https://openrouter.ai/), open [openrouter.ai/keys](https://openrouter.ai/keys), and choose **Create Key**. Copy the key. It starts with `sk-or-v1-`. You can set a monthly credit limit on that same page so a run cannot spend without a cap.
+
+**2. Paste it once.**
+
+| Where you use Jev | Where the key goes |
+|---|---|
+| Android | Open the app → Settings → Judge API → paste the key. Leave Reply API and Vision API empty. |
+| Chrome | `chrome://extensions` → Jev Assistant → Details → Extension options. Paste the key into **Judge API key** and save. |
+| Firefox | Extensions → Jev Assistant → Options. Paste the key into **Judge API key** and save. Firefox does not share Chrome's saved key. |
+| Mac | Menu bar **Jev** → **Set Judge API key…** → Paste → Save. Leave **Set Reply API key** empty to reuse the judge key. |
+
+**3. Analyze a chat.** Leave a conversation in front (a Direct thread, a WhatsApp chat, or Messages). Open Jev and choose Analyze. The panel shows the intent, the risk, and three ranked replies. **Fill** puts the text in the compose box. You send it yourself.
+
+The default judge and reply models are paid OpenRouter models. To spend less, change the model id in settings to one ending in `:free`. An empty Reply key always reuses the Judge key.
+
+## Android
+
+The phone needs Android 11 or newer.
+
+1. On the phone, open [the release APK](apk/jev-assistant-v1.3-release.apk) and download it.
+2. Tap the download. If Android blocks it, allow installs from the browser, then open the file.
+3. Paste the OpenRouter key in Settings → Judge API.
+4. Turn on **Accessibility** and **Display over other apps**.
+
+From a computer you can also run:
 
 ```bash
 adb install -r apk/jev-assistant-v1.3-release.apk
 ```
 
-**2. Enter your key.** Open the app → Settings → "Endpoints" has three cards: Judge API / Reply API / Vision API. The simplest setup is to fill in just the "Judge API" card with your [OpenRouter](https://openrouter.ai/) API key — leave the other two blank and they'll automatically inherit this key.
+That APK is the older v1.3 build. It does not include the later WhatsApp and Snapchat readers. Those readers are in the source tree and need a new build:
 
-**3. Grant permissions.** Follow the home-screen wizard:
+```bash
+./gradlew assembleDebug
+```
 
-- Accessibility (to read messages; after upgrading you may need to turn it off and back on once)
-- Display over other apps / overlay window (to show the analysis)
-- Autostart + no battery restrictions on skins that freeze background processes
+The debug APK is written to `app/build/outputs/apk/debug/app-debug.apk`.
 
-If you had a debug build installed, uninstall it before installing the release build (different signatures); uninstalling clears your key and settings.
+## Laptop
 
-## Laptop (Chrome or Firefox)
+The extension is the same folder for Chrome and Firefox. It reads WhatsApp Web, Snapchat Web, Instagram Direct, and Google Messages for web.
 
-The same extension gives the judge-then-draft pipeline on a laptop, in Chrome's side panel or Firefox's sidebar.
+**Chrome.** Open `chrome://extensions`, turn on Developer mode, choose **Load unpacked**, and select the `extension/` folder. Click the Jev toolbar icon to open the side panel.
 
-**Chrome.** `chrome://extensions` → enable Developer mode → **Load unpacked** → select the `extension/` folder in this repo.
+**Firefox.** Open `about:debugging#/runtime/this-firefox`, choose **Load Temporary Add-on…**, and pick `extension/manifest.json`. A temporary add-on is removed when Firefox quits. Load that file again after a restart. Click the Jev toolbar icon to open the sidebar.
 
-**Firefox.** `about:debugging#/runtime/this-firefox` → **Load Temporary Add-on…** → pick `extension/manifest.json`. Temporary add-ons disappear when Firefox quits; load that file again after a restart.
+Paste the OpenRouter key in the extension options, as in [Connect an OpenRouter API key](#connect-an-openrouter-api-key). Leave the Reply key blank to reuse it.
 
-**Key setup.** Right-click the toolbar icon → Options (Firefox: Extensions → Jev Assistant → Options) → paste your [OpenRouter](https://openrouter.ai/) API key into "Judge API key" and save. Leave "Reply API key" blank to reuse the Judge key, or set your own relationship note and models under Advanced.
+An iPhone cannot let an app read WhatsApp or Snapchat. On a computer, use WhatsApp Desktop or WhatsApp Web, or Snapchat Web while signed in. Jev reads that window.
 
-**Supported sites:** WhatsApp Web (`web.whatsapp.com`), Snapchat Web (`web.snapchat.com`), Instagram web (`instagram.com`, Direct threads), and Google Messages for web (`messages.google.com`). Click the toolbar icon to open the panel while one of those sites is the active tab.
+**Fill** only writes into the site's own message box. It does not press Enter and it does not click Send.
 
-**iPhone chats on a computer.** An iPhone app cannot read WhatsApp or Snapchat. Link the iPhone in WhatsApp (WhatsApp Desktop on the Mac, or WhatsApp Web), or open Snapchat Web in Chrome or Firefox while signed in. Jev reads that window.
+## Mac
 
-**It never sends.** Clicking "Fill" on a suggested reply only puts the text into that site's own message box — it never presses Enter and never clicks a send button. You always review and send it yourself.
+The menu-bar app reads Apple Messages (iMessage, and SMS forwarded from an iPhone) and WhatsApp Desktop. Snapchat on a Mac is the browser extension. There is no Snapchat Mac app.
 
-Selectors are written against hand-built fixtures and haven't yet been confirmed against every live DOM — see `extension/test/fixtures/README.md` before relying on this in a real conversation.
-
-## Mac (Apple Messages and WhatsApp Desktop)
-
-A menu-bar app for Apple Messages (iMessage and SMS forwarded from an iPhone) and for WhatsApp Desktop (chats linked from an iPhone). Snapchat on a computer is the browser extension, because Snapchat has no Mac app.
-
-**Requirements.** macOS 14+, Messages signed in, and iPhone SMS forwarding on if you want SMS threads.
-
-**Build.** From the repo root:
+Requirements: macOS 14 or newer, Messages signed in, and SMS forwarding turned on if you want SMS threads.
 
 ```bash
 bash mac/package.sh
 ```
 
-That produces `mac/build/Jev Assistant.app` (ad-hoc signed). Open it; a **Jev** item appears in the menu bar.
+Open `mac/build/Jev Assistant.app`. A **Jev** item appears in the menu bar. Grant Accessibility under System Settings → Privacy & Security → Accessibility, then set the Judge API key from the Jev menu. Each rebuild changes the ad-hoc signature, so macOS may ask for Accessibility again.
 
-**Permissions.** Grant Accessibility when prompted (System Settings → Privacy & Security → Accessibility). Use the Jev menu to set the Judge API key (and optionally a Reply key / relationship note). Ad-hoc signatures change every rebuild, so macOS may ask for Accessibility again after you rebuild.
+The menu bar follows Messages and WhatsApp Desktop only. Switching to another app stops the current analysis. Instagram is the browser extension.
 
-**It never sends.** Fill only sets the compose field value (or copies to the clipboard if the field can't be set). It never presses Return, never clicks Send, and never uses AppleScript to send.
+**Fill** writes the compose field, or copies the text if the field cannot be set. It does not press Return.
 
-## Features
+## Supported chats
 
-### Judgment and reply candidates
+| Chat | Where | How it is read |
+|---|---|---|
+| WhatsApp | Android app, WhatsApp Desktop, WhatsApp Web | Accessibility on Android and Mac. The page DOM in Chrome and Firefox. |
+| Snapchat | Android app, Snapchat Web | Accessibility on Android. The page DOM in the browser. |
+| Instagram | Android app, instagram.com Direct | Accessibility on Android. The page DOM in the browser. |
+| SMS / iMessage | Google Messages, Apple Messages | Accessibility on Android and Mac. Google Messages for web in the browser. |
+| QQ, X, Feishu | Android | Accessibility. Feishu falls back to on-device OCR when the message text is drawn rather than exposed. |
+| Any other app | Android | Overlay menu **Read screen once**. Manual. It does not separate you from the other person. |
 
-- The judgment model returns, in one call: the other person's real intent, risk level (1–9), what they want, whether to reply right away, and the best action to take. About 1 second, with a confidence score attached.
-- The generation model drafts 3 casual, natural-sounding candidates; the judgment model ranks them by "best fit" and gives a share for each.
-- Tap once in the overlay to copy or fill in — filling uses `ACTION_SET_TEXT`, falling back automatically to clipboard-paste on failure. **It never sends, under any circumstances.**
+Jev only reads chats already open on your own device.
 
-### Knowledge base and contacts
+## How a suggestion is made
 
-Under Settings → Analysis → "Knowledge base & contacts."
+```
+open chat  →  read the recent messages
+           →  judge intent, risk, needs, and whether to reply
+           →  draft 3 replies
+           →  rank those 3
+           →  show them
+           →  Fill writes the box
+           →  you send
+```
 
-- **Notes**: title / content / tags / always-on.
-- **Contacts**: name / aliases / relationship / notes.
-- **History**: off by default; when enabled, each analysis can include recent local history.
-- **Clear**: both live in the app's private directory; settings can wipe them in one tap.
+One adapter per app or site turns the window into a title plus a list of who said what. Everything after that is shared. The judgment call asks only multiple-choice, score, and yes/no questions. The reply model drafts the three candidates.
 
-### Endpoints and models
+<details>
+<summary><b>Add another Android chat app</b></summary>
 
-- The address, key, and model for judge / reply / vision can each be set independently.
-- Works with just one key: leaving reply and vision blank makes them inherit the judge endpoint's configuration.
+1. Implement `ChatAppAdapter` in `app/src/main/java/com/jev/probe/capture/`. `pkg` is the package name. `extract` returns the title and messages, or `null` when the screen is not a chat.
+2. Register it in `ChatCaptureService`.
+3. Judgment, ranking, the overlay, and Fill stay as they are.
 
-### Capture and OCR
-
-- One adapter per app; the service dispatches by foreground package name.
-- When the accessibility tree has no message text, it can take a screenshot and run offline OCR — no image is uploaded.
-- Any app can trigger "Read screen once (OCR)" manually from the overlay menu.
+</details>
 
 ## FAQ
 
 <details>
 <summary><b>Will it send messages for me?</b></summary>
 
-No. The program only fills the selected reply into the input box — you always tap send yourself.
+No. Fill only puts the selected reply in the input box. You tap send.
 
 </details>
 
 <details>
-<summary><b>Does it need root or Xposed? Will it get my account banned?</b></summary>
+<summary><b>Does it need root?</b></summary>
 
-No root needed, and no modules to install. It doesn't modify the chat app's package, doesn't inject into its process, doesn't call any private API — it only reads what the system accessibility service (or the page DOM) exposes.
-
-</details>
-
-<details>
-<summary><b>Will my chat history get uploaded?</b></summary>
-
-Chat content is only sent, at the moment you trigger an analysis, to the model endpoint you yourself configured in settings. This project runs no server of its own — nothing is collected, written to disk, or logged. History is off by default; once enabled, it's still only stored in the app's private directory on your phone.
+No. It does not modify the chat app and it does not inject into its process.
 
 </details>
 
 <details>
-<summary><b>Does it cost money?</b></summary>
+<summary><b>Where does the chat text go?</b></summary>
 
-The app itself is free and open source. Model calls go through your own API key and are billed by the provider based on usage — the project never handles any money.
-
-</details>
-
-## How it works
-
-```
-WhatsApp / Snapchat / Instagram / Messages ──(accessibility / DOM)──▶ capture recent messages
-                                  │
-              ┌───────────────────┴───────────────────┐
-              ▼                                        ▼
-   Jev judgment (7 questions, one call)      generation model drafts 3 candidates
-   intent / risk / needs / action / reply-now?          │
-              └───────────────────┬───────────────────┘
-                                  ▼
-                        Jev ranks the 3 candidates
-                                  ▼
-              overlay / side panel shows results → copy / fill (never sends)
-```
-
-- **Capture**: one adapter per app (or site), dispatched by package name or host. An adapter's only job is turning the current window into "title + message list (who said what)" — everything downstream is generic.
-- **Judgment**: [Jev](https://docs.typesafe.ai/) only answers multiple-choice / scoring / yes-no questions, all in one request.
-- **Reply**: the generation model drafts 3 candidates, Jev ranks them.
-- **Fill-in**: set the compose field (or clipboard paste) — never sends.
-
-<details>
-<summary><b>Adapting a new chat app</b></summary>
-
-1. Implement `ChatAppAdapter` in `capture/ChatAppAdapter.kt`: `pkg` is the package name, `extract(root, res)` pulls the title and message list.
-2. Add a line to `adapters` in `capture/ChatCaptureService.kt`.
-3. Judgment, candidates, overlay, and fill-in all need no changes.
-
-Start with `adb shell uiautomator dump` to see what the target app exposes. An adapter returning `null` means "not in a chat window"; returning an empty message list means "in a chat window but the tree has no message text" — only the latter triggers the OCR fallback.
+Only to the API endpoint you saved, and only when you run an analysis. Jev has no server of its own. Local history is off until you turn it on, and then it stays in the app's private storage.
 
 </details>
 
 <details>
-<summary><b>Build and directory structure</b></summary>
+<summary><b>Does the app cost money?</b></summary>
 
-JDK 17 + Android SDK (platform 35 / build-tools 35).
-
-```bash
-./gradlew assembleDebug      # app/build/outputs/apk/debug/app-debug.apk
-./gradlew assembleRelease    # needs a signing properties file outside the repo, pointed to by JEV_KEYSTORE_PROPS
-```
-
-- `app/` — the Android app (Kotlin)
-- `extension/` — Chrome / Firefox MV3 extension
-- `mac/` — menu-bar app for Messages and WhatsApp Desktop
-- `docs/` — design and acceptance docs
-- `apk/` — signed release builds
+The app is free. OpenRouter charges for the model calls on your key. Set a credit limit when you create the key.
 
 </details>
 
-## Known limitations
+## Limitations
 
-- Some Android skins freeze background processes even with keep-alive configured — interacting with the chat usually brings the overlay back.
-- Feishu message text relies on OCR when the body is custom-drawn.
-- Group chats are analyzed as if 1:1.
-- Knowledge-base retrieval is tag/title substring matching, not semantic search.
-- OCR only sees what's visible on screen; protected windows (`FLAG_SECURE`) can't be captured.
+- The shipped Android APK is v1.3 and does not contain the later WhatsApp and Snapchat readers. Build from source for those.
+- Some Android skins freeze the background process. Opening the chat again brings the overlay back.
+- Group chats are read as if they were a one-to-one thread.
+- Knowledge-base matching is by tag and title text, not by meaning.
+- OCR only sees what is on screen. Windows marked secure cannot be captured.
+- Firefox add-ons loaded from this folder are temporary and disappear when Firefox quits.
 
 ## License
 
-Code is open-sourced under [MIT](LICENSE); see also [NOTICE](NOTICE).
+Code is under [MIT](LICENSE). See also [NOTICE](NOTICE).
 
-**Disclaimer**: this project only handles chats on your own device that you already have the right to view. Follow the terms of service of each chat app, as well as local laws — the author is not responsible for how it's used.
+This project only handles chats on your own device that you already have the right to view. Follow each app's terms and local law.
