@@ -6,6 +6,19 @@
   "judge_model_default": "typesafe/jev-1.13",
   "draft_user_template": "Relationship: {relationship}\n\nRecent conversation:\n{conversation}\n\nGive 3 candidate replies.",
   "judge_questions": {
+    "mood": {
+      "instructions": "What is the other person's mood across these messages? Weight the latest line most, and use earlier lines for tone. Pick the single closest fit. Facts given in background are provided context, not off-topic.",
+      "criteria": {
+        "flirty": "They are teasing, complimenting, or playing along with romantic interest.",
+        "playful": "They are joking or bantering. Warm, but not clearly flirting back.",
+        "warm": "Friendly, pleased, or affectionate, without a joke and without a test.",
+        "neutral": "Plain, practical, or hard to read. No strong feeling either way.",
+        "unsure": "Hesitant, awkward, or keeping some distance while still replying.",
+        "annoyed": "Irritated, unimpressed, sarcastic, or shutting a line down.",
+        "hurt": "Sad, cold, or wounded. The feeling is pain more than irritation."
+      },
+      "type": "choice"
+    },
     "danger_level": {
       "instructions": "How close is this conversation to a fight or to hurting the relationship? Match the current scene. If they genuinely accepted an apology or confirmed a happy plan, score the cooled-down present, not an earlier complaint. If an ultimatum (break up, report to the boss, stop covering for you) is still in force and has not been withdrawn, stay in that high bin even if the latest line names a specific task. Facts given in background are provided context, not off-topic.",
       "criteria": [
@@ -92,6 +105,8 @@
     "needs": {"apology": "an apology", "action": "a concrete action", "explanation": "an explanation",
               "care": "your care", "nothing": "(nothing)"},
     "action": {"check_history": "check history", "apologize": "apologize first", "give_commitment": "commit",
-               "explain": "explain", "acknowledge": "acknowledge", "say_less": "say less", "make_plan": "make a plan"}
+               "explain": "explain", "acknowledge": "acknowledge", "say_less": "say less", "make_plan": "make a plan"},
+    "mood": {"flirty": "flirty", "playful": "playful", "warm": "warm", "neutral": "neutral",
+             "unsure": "unsure", "annoyed": "annoyed", "hurt": "hurt"}
   }
 }

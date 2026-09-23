@@ -13,6 +13,7 @@ function render(view) {
   if (view.error) { body.append(el("div", "Something went wrong", "err"), el("div", view.error, "sub")); return; }
   if (view.status) { body.append(el("div", view.status, "sub")); return; }
   const s = view.summary ?? {};
+  if (s.mood) body.append(el("div", `Mood: ${label("mood", s.mood)}${s.moodPct == null ? "" : ` ${s.moodPct}%`}`));
   if (s.intent) body.append(el("div", `Their real intent: ${label("intent", s.intent)}`));
   const bits = [];
   if (s.risk != null) bits.push(`Risk ${Math.round(s.risk)}/9`);

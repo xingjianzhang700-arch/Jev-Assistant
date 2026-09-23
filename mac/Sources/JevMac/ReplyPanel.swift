@@ -37,6 +37,10 @@ final class ReplyPanel {
         // Old buttons disappear in set(); buttons hold targets weakly, so we keep the live ones.
         targets.removeAll()
         var views: [NSView] = []
+        if let m = s.mood {
+            let pct = s.moodPct.map { " \($0)%" } ?? ""
+            views.append(label("Mood: \(brainLabel("mood", m))\(pct)", bold: true))
+        }
         if let i = s.intent { views.append(label("Their real intent: \(brainLabel("intent", i))", bold: true)) }
         var bits: [String] = []
         if let r = s.risk { bits.append("Risk \(Int(r.rounded()))/9") }

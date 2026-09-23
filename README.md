@@ -10,7 +10,7 @@
 
 ## Demo
 
-Nine seconds, fictional chat. Jev reads the thread, names the intent and risk, ranks three replies, and fills the box. The Send button is never pressed.
+Twenty-two seconds. He tries a parking-ticket line. She is not impressed. Jev reads her mood as a percent, ranks three less-painful replies, and fills the box. Send stays his.
 
 ![Jev reads a chat, ranks three replies, and fills the box without sending](docs/demo.gif)
 
@@ -20,6 +20,8 @@ Nine seconds, fictional chat. Jev reads the thread, names the intent and risk, r
 
 - [What Jev does](#what-jev-does)
 - [Connect an OpenRouter API key](#connect-an-openrouter-api-key)
+- [Phone or Windows, no install](#phone-or-windows-no-install)
+- [Windows](#windows)
 - [Android](#android)
 - [Laptop](#laptop)
 - [Mac](#mac)
@@ -56,6 +58,20 @@ Jev does not ship a key. Analysis calls [OpenRouter](https://openrouter.ai/) wit
 
 The default judge and reply models are paid OpenRouter models. To spend less, change the model id in settings to one ending in `:free`. An empty Reply key always reuses the Judge key.
 
+The panel now includes her **mood** and how sure Jev is, for example `Mood: playful 64%`. That percent is the model's probability for the closest mood, judged from the messages with the latest line weighted most.
+
+## Phone or Windows, no install
+
+iPhone cannot let an app read WhatsApp, Snapchat, or Messages. Chrome on Android cannot load this extension either. The page below works in the phone's browser and in any Windows browser: paste the chat, get the mood percent and three replies, copy one back.
+
+Open [Jev in the browser](https://xingjianzhang700-arch.github.io/Jev-Assistant/use.html). On a phone, copy the thread out of the chat app first. Lines look like `Me:` and `Her:`. The OpenRouter key stays in that browser. Jev still does not send. The page source is [docs/use.html](docs/use.html).
+
+## Windows
+
+Windows uses the same browser extension as a Mac laptop. Install Chrome or Firefox, then follow [Laptop](#laptop). The extension reads WhatsApp Web, Snapchat Web, Instagram Direct, and Google Messages while that tab is open.
+
+If you do not want to install an extension, use [Jev in the browser](https://xingjianzhang700-arch.github.io/Jev-Assistant/use.html) and paste the chat.
+
 ## Android
 
 The phone needs Android 11 or newer.
@@ -71,7 +87,7 @@ From a computer you can also run:
 adb install -r apk/jev-assistant-v1.3-release.apk
 ```
 
-That APK is the older v1.3 build. It does not include the later WhatsApp and Snapchat readers. Those readers are in the source tree and need a new build:
+That APK is the older v1.3 build. It does not include mood, or the later WhatsApp and Snapchat readers. Those are in the source tree and need a new build:
 
 ```bash
 ./gradlew assembleDebug

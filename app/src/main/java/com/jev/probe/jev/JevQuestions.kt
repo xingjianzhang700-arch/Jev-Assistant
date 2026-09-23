@@ -39,8 +39,21 @@ object JevQuestions {
         put("criteria", JSONArray().also { a -> levels.forEach { a.put(it) } })
     }
 
-    /** The 7 judgment questions. Returns a fresh JSONObject each call. */
+    /** The judgment questions. Returns a fresh JSONObject each call. */
     fun judge(): JSONObject = JSONObject().apply {
+        put("mood", choice(
+            "What is the other person's mood across these messages? Weight the latest line most, " +
+                "and use earlier lines for tone. Pick the single closest fit.",
+            linkedMapOf(
+                "flirty" to "They are teasing, complimenting, or playing along with romantic interest.",
+                "playful" to "They are joking or bantering. Warm, but not clearly flirting back.",
+                "warm" to "Friendly, pleased, or affectionate, without a joke and without a test.",
+                "neutral" to "Plain, practical, or hard to read. No strong feeling either way.",
+                "unsure" to "Hesitant, awkward, or keeping some distance while still replying.",
+                "annoyed" to "Irritated, unimpressed, sarcastic, or shutting a line down.",
+                "hurt" to "Sad, cold, or wounded. The feeling is pain more than irritation."
+            )
+        ))
         put("literal_question", noul(
             "Is the other person's latest message meant purely literally, with no subtext? " +
                 "Judge from the whole thread, not one sentence in isolation.",

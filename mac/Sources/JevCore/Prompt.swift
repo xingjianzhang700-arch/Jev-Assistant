@@ -65,8 +65,13 @@ public enum Prompt {
     public static func summary(_ a: [String: Any]) -> Summary {
         func obj(_ k: String) -> [String: Any]? { a[k] as? [String: Any] }
         func num(_ k: String, _ f: String) -> Double? { (obj(k)?[f] as? NSNumber)?.doubleValue }
+        let mood = obj("mood")
+        let moodChoice = mood?["choice"] as? String
+        let moodProbs = mood?["probabilities"] as? [String: Any]
+        let moodRaw = moodChoice.flatMap { moodProbs?[$0] as? NSNumber } ?? mood?["confidence"] as? NSNumber
         return Summary(intent: obj("true_intent")?["choice"] as? String, risk: num("danger_level", "score"),
                        needs: obj("she_needs")?["choice"] as? String, bestAction: obj("best_action")?["choice"] as? String,
-                       specificsOk: num("should_reply_now", "noul"), tensionResolved: num("tension_resolved", "noul"))
+                       specificsOk: num("should_reply_now", "noul"), tensionResolved: num("tension_resolved", "noul"),
+                       mood: moodChoice, moodPct: moodRaw.map { Int(($0.doubleValue * 100).rounded()) })
     }
 }

@@ -26,10 +26,13 @@ public struct Summary: Equatable {
     public let bestAction: String?
     public let specificsOk: Double?
     public let tensionResolved: Double?
+    public let mood: String?
+    public let moodPct: Int?
     public init(intent: String?, risk: Double?, needs: String?, bestAction: String?,
-                specificsOk: Double?, tensionResolved: Double?) {
+                specificsOk: Double?, tensionResolved: Double?, mood: String? = nil, moodPct: Int? = nil) {
         self.intent = intent; self.risk = risk; self.needs = needs; self.bestAction = bestAction
         self.specificsOk = specificsOk; self.tensionResolved = tensionResolved
+        self.mood = mood; self.moodPct = moodPct
     }
 }
 

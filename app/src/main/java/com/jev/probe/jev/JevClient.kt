@@ -16,7 +16,7 @@ class JevClient(prefs: Prefs) {
     private val judgeClient = JudgeClient(prefs)
     private val replyClient = ReplyClient(prefs)
 
-    /** The 7 judgment questions. Errors come back inside [Analysis.error]. */
+    /** The judgment questions, including mood. Errors come back inside [Analysis.error]. */
     fun judge(snapshot: ChatSnapshot, relationship: String, ctx: ChatContext? = null): Analysis =
         judgeClient.judge(snapshot, relationship, ctx)
 

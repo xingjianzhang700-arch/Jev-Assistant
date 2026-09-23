@@ -18,7 +18,7 @@ check(st["latest_from"] as? String == "me", "state latest_from")
 
 // Prompt: bodies
 let jb = Prompt.judgeBody(snap, relationship: "friend", model: "typesafe/jev-1.13")
-check((jb["questions"] as? [String: Any])?.count == 7, "judge body has 7 questions")
+check((jb["questions"] as? [String: Any])?.count == 8, "judge body has 8 questions")
 let rb = Prompt.rankBody(snap, relationship: "friend", model: "m", candidates: ["a", "b", "c"])
 let best = (rb["questions"] as! [String: Any])["best_reply"] as! [String: Any]
 check(best["criteria"] as? [String: String] == ["reply_a": "a", "reply_b": "b", "reply_c": "c"], "rank criteria")
@@ -40,9 +40,10 @@ check(rk.map(\.text) == ["b", "a", "c"], "ranked sorts by prob")
 let sm = Prompt.summary([
     "true_intent": ["choice": "casual_chat"], "danger_level": ["score": 1.4], "she_needs": ["choice": "nothing"],
     "best_action": ["choice": "make_plan"], "should_reply_now": ["noul": 0.9], "tension_resolved": ["noul": 0.95],
+    "mood": ["choice": "playful", "confidence": 0.2, "probabilities": ["playful": 0.64, "annoyed": 0.1]],
 ])
 check(sm == Summary(intent: "casual_chat", risk: 1.4, needs: "nothing", bestAction: "make_plan",
-                    specificsOk: 0.9, tensionResolved: 0.95), "summary fields")
+                    specificsOk: 0.9, tensionResolved: 0.95, mood: "playful", moodPct: 64), "summary fields")
 check(brainLabel("intent", "casual_chat") == "casual chat", "labels from brain")
 
 // Side rule

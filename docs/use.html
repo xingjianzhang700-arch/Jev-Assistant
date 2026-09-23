@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jev Assistant</title>
+  <style>
+    :root { color-scheme: dark; font: 17px/1.45 system-ui, sans-serif; }
+    body { margin: 0; background: #0e1116; color: #e8edf2; }
+    main { max-width: 40rem; margin: 0 auto; padding: 20px 16px 48px; }
+    h1 { font-size: 1.6rem; margin: 0 0 6px; }
+    .cyan { color: #3ee0d2; }
+    p.lead, .hint { color: #8b97a6; }
+    label { display: block; margin: 16px 0 6px; font-size: 0.9rem; }
+    textarea, input { width: 100%; box-sizing: border-box; border: 1px solid #2a323e; border-radius: 12px;
+      background: #171c24; color: inherit; font: inherit; padding: 12px; }
+    textarea { min-height: 180px; }
+    button { margin-top: 14px; width: 100%; border: 0; border-radius: 12px; padding: 14px;
+      background: #1c5c58; color: #e8edf2; font: inherit; font-weight: 650; }
+    .card { margin-top: 14px; border: 1px solid #2a323e; border-radius: 14px; padding: 12px 14px; background: #171c24; }
+    .reply { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+    .reply button { width: auto; margin: 0; padding: 8px 12px; }
+    .err { color: #f0a8a8; }
+  </style>
+</head>
+<body>
+<main>
+  <h1><span class="cyan">Jev</span> Assistant</h1>
+  <p class="lead">Paste a chat. Jev reads her mood as a percent and suggests three replies. Nothing is sent.</p>
+  <label for="key">OpenRouter API key</label>
+  <input id="key" type="password" autocomplete="off" placeholder="sk-or-v1-…">
+  <p class="hint">Saved only in this browser. Create one at openrouter.ai/keys and set a spending cap.</p>
+  <label for="chat">Chat</label>
+  <textarea id="chat" placeholder="Me: be honest. are you a parking ticket&#10;Her: sir. it is tuesday."></textarea>
+  <p class="hint">Start each line with Me: or Her:. On a phone, copy the thread from the chat app and paste it here.</p>
+  <button id="go" type="button">Analyze</button>
+  <div id="out"></div>
+</main>
+<script type="module">
+const $ = (id) => document.getElementById(id);
+const out = $("out");
+$("key").value = localStorage.getItem("jev-key") || "";
+
+function parseChat(raw) {
+  const msgs = [];
+  for (const line of raw.split("\n").map((s) => s.trim()).filter(Boolean)) {
+    const m = line.match(/^(me|i|him|boy|her|she|girl|them|other)\s*:\s*(.*)$/i);
+    if (!m) { if (msgs.length) msgs.at(-1).text += " " + line; else msgs.push({ side: "other", text: line }); continue; }
+    const who = m[1].toLowerCase();
+    msgs.push({ side: ["me", "i", "him", "boy"].includes(who) ? "me" : "other", text: m[2] });
+  }
+  return msgs.slice(-10);
+}
+
+function card(html) { const d = document.createElement("div"); d.className = "card"; d.innerHTML = html; return d; }
+function textCard(s) { const d = card(""); d.textContent = s; return d; }
+
+async function loadBrain() {
+  const urls = [
+    "https://raw.githubusercontent.com/xingjianzhang700-arch/Jev-Assistant/english-instagram-sms/extension/brain.json",
+    new URL("../extension/brain.json", import.meta.url).href,
+  ];
+  for (const url of urls) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) return await res.json();
+    } catch { /* try the next copy */ }
+  }
+  throw new Error("Could not load Jev's question set.");
+}
+
+async function post(url, key, body) {
+  const headers = { Authorization: `Bearer ${key}`, "Content-Type": "application/json", "HTTP-Referer": "https://jev-assistant.local", "X-Title": "Jev Assistant" };
+  const res = await fetch(url, { method: "POST", headers, body: JSON.stringify(body) });
+  const text = await res.text();
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${text.slice(0, 140)}`);
+  return JSON.parse(text);
+}
+
+$("go").onclick = async () => {
+  const key = $("key").value.trim();
+  const messages = parseChat($("chat").value);
+  out.replaceChildren();
+  if (!key || !messages.length) { out.append(textCard("Add your OpenRouter key and at least one message.")); return; }
+  localStorage.setItem("jev-key", key);
+  out.append(textCard("Analyzing…"));
+  try {
+    const brain = await loadBrain();
+    const state = { chat: { relationship: brain.default_relationship, messages: messages.map((m) => ({ from: m.side, text: m.text })), latest_from: messages.at(-1).side } };
+    const convo = messages.map((m) => (m.side === "me" ? "Me: " : "Them: ") + m.text).join("\n");
+    const [judged, drafted] = await Promise.all([
+      post(brain.judge_url_default, key, { model: brain.judge_model_default, state, questions: brain.judge_questions }),
+      post(brain.reply_url_default, key, { model: brain.reply_model_default, temperature: 0.8, messages: [
+        { role: "system", content: brain.draft_system },
+        { role: "user", content: brain.draft_user_template.replace("{relationship}", brain.default_relationship).replace("{conversation}", convo) },
+      ] }),
+    ]);
+    const answers = judged.answers || {};
+    const mood = answers.mood || {};
+    const pctRaw = mood.probabilities?.[mood.choice] ?? mood.confidence;
+    const pct = Number.isFinite(Number(pctRaw)) ? Math.round(Number(pctRaw) * 100) : null;
+    let replies = [];
+    try { replies = JSON.parse((drafted.choices?.[0]?.message?.content || "").match(/\[[\s\S]*\]/)?.[0] || "[]"); } catch { replies = []; }
+    replies = replies.map((s) => String(s).trim()).filter(Boolean).slice(0, 3);
+    while (replies.length < 3) replies.push(brain.fallback_reply);
+    out.replaceChildren();
+    if (mood.choice) out.append(textCard(`Mood: ${brain.labels?.mood?.[mood.choice] || mood.choice}${pct == null ? "" : ` ${pct}%`}`));
+    const intent = answers.true_intent?.choice;
+    if (intent) out.append(textCard(`Intent: ${brain.labels?.intent?.[intent] || intent}`));
+    for (const text of replies) {
+      const row = card("");
+      row.classList.add("reply");
+      const span = document.createElement("span");
+      span.textContent = text;
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = "Copy";
+      b.onclick = () => navigator.clipboard.writeText(text);
+      row.append(span, b);
+      out.append(row);
+    }
+    out.append(textCard("Copy a reply into the chat yourself. Jev does not send it."));
+  } catch (e) {
+    out.replaceChildren(textCard(String(e.message || e)));
+    out.firstChild.classList.add("err");
+  }
+};
+</script>
+</body>
+</html>

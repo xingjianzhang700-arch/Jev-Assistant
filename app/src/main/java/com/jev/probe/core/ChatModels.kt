@@ -47,6 +47,7 @@ data class Analysis(
     val tensionResolved: Double?,
     val literalQuestion: Double?,
     val rankedReplies: List<RankedReply>,
+    val mood: Choice? = null,
     val latencyMs: Long,
     val error: String? = null
 )

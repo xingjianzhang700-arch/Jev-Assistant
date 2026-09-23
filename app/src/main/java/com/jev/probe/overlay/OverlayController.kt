@@ -404,6 +404,10 @@ class OverlayController(private val ctx: Context) {
             tintBubbleDanger(it.score)
         }
         // Intent headline.
+        a.mood?.let {
+            val pct = ((it.probabilities[it.choice] ?: it.confidence) * 100).roundToInt()
+            views.add(line("Mood: ${MOOD[it.choice] ?: it.choice} $pct%", "#111827", 15f, true))
+        }
         a.trueIntent?.let {
             views.add(line("Their real intent: ${INTENT[it.choice] ?: it.choice}", "#111827", 15f, true))
             views.add(hint("Confidence ${(it.confidence * 100).roundToInt()}%"))
@@ -546,6 +550,9 @@ class OverlayController(private val ctx: Context) {
     }
 
     companion object {
+        private val MOOD = mapOf(
+            "flirty" to "flirty", "playful" to "playful", "warm" to "warm", "neutral" to "neutral",
+            "unsure" to "unsure", "annoyed" to "annoyed", "hurt" to "hurt")
         private val INTENT = mapOf(
             "confirm_you_care" to "checking you care", "vent_anger" to "venting",
             "request_action" to "wants action", "seek_explanation" to "wants an explanation",

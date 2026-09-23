@@ -80,6 +80,13 @@ export function rankReplies(bestReply, candidates) {
     .sort((x, y) => y.prob - x.prob);
 }
 
+export function moodPercent(answer) {
+  if (!answer?.choice) return null;
+  const raw = answer.probabilities?.[answer.choice] ?? answer.confidence;
+  const n = Number(raw);
+  return Number.isFinite(n) ? Math.round(n * 100) : null;
+}
+
 export function summarize(a) {
   return {
     intent: a.true_intent?.choice ?? null,
@@ -89,5 +96,7 @@ export function summarize(a) {
     bestAction: a.best_action?.choice ?? null,
     specificsOk: a.should_reply_now?.noul ?? null,
     tensionResolved: a.tension_resolved?.noul ?? null,
+    mood: a.mood?.choice ?? null,
+    moodPct: moodPercent(a.mood),
   };
 }

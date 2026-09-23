@@ -33,7 +33,7 @@ test("judge body sends the shared question set verbatim", () => {
   const b = judgeBody(brain, "typesafe/jev-1.13", convo, "friend");
   assert.equal(b.model, "typesafe/jev-1.13");
   assert.deepEqual(b.questions, brain.judge_questions);
-  assert.equal(Object.keys(b.questions).length, 7);
+  assert.equal(Object.keys(b.questions).length, 8);
 });
 
 test("rank body asks best_reply over exactly three candidates", () => {
@@ -72,7 +72,13 @@ test("summarize picks the fields the panel shows", () => {
     tension_resolved: { noul: 0.95 },
   });
   assert.deepEqual(s, { intent: "casual_chat", intentConfidence: 0.8, risk: 1.4, needs: "nothing",
-    bestAction: "make_plan", specificsOk: 0.9, tensionResolved: 0.95 });
+    bestAction: "make_plan", specificsOk: 0.9, tensionResolved: 0.95, mood: null, moodPct: null });
+});
+
+test("mood percent uses the chosen mood's probability", () => {
+  const s = summarize({ mood: { choice: "flirty", confidence: 0.4, probabilities: { flirty: 0.72, annoyed: 0.1 } } });
+  assert.equal(s.mood, "flirty");
+  assert.equal(s.moodPct, 72);
 });
 
 test("signature changes when the last messages change", () => {
