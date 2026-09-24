@@ -17,6 +17,9 @@
     textarea { min-height: 180px; }
     button { margin-top: 14px; width: 100%; border: 0; border-radius: 12px; padding: 14px;
       background: #1c5c58; color: #e8edf2; font: inherit; font-weight: 650; }
+    .actions { display: flex; gap: 10px; }
+    .actions button { flex: 1; }
+    button.secondary { background: #243038; }
     .card { margin-top: 14px; border: 1px solid #2a323e; border-radius: 14px; padding: 12px 14px; background: #171c24; }
     .moods { display: flex; flex-wrap: wrap; gap: 16px; align-items: baseline; font-weight: 650; }
     .mood-label { color: #8b97a6; }
@@ -28,7 +31,7 @@
 <body>
 <main>
   <h1><span class="cyan">Jev</span> Assistant</h1>
-  <p class="lead">Paste a chat. Jev reads her mood as a percent and suggests three replies. Nothing is sent.</p>
+  <p class="lead">On Windows, share the chat window. Jev reads it once, scores her mood, and suggests three replies. Nothing is sent.</p>
   <label for="key">OpenRouter API key</label>
   <input id="key" type="password" autocomplete="off" placeholder="sk-or-v1-…">
   <p class="hint">Saved only in this browser. Create one at openrouter.ai/keys and set a spending cap.</p>
@@ -37,8 +40,12 @@
   <p class="hint">Jev uses this as who they are to you. Leave blank for the default.</p>
   <label for="chat">Chat</label>
   <textarea id="chat" placeholder="Me: be honest. are you a parking ticket&#10;Her: sir. it is tuesday."></textarea>
-  <p class="hint">Start each line with Me: or Her:. On a phone, copy the thread from the chat app and paste it here.</p>
-  <button id="go" type="button">Analyze</button>
+  <p class="hint">Or paste a thread. Start each line with Me: or Her:. Right-side bubbles are Me.</p>
+  <div class="actions">
+    <button id="share" type="button">Read a window</button>
+    <button id="go" class="secondary" type="button">Analyze pasted chat</button>
+  </div>
+  <p class="hint">Read a window opens the system share picker. Choose the Instagram, WhatsApp, or Snapchat window. One frame goes to your OpenRouter vision model and is not saved.</p>
   <div id="out"></div>
 </main>
 <script type="module">
@@ -83,9 +90,57 @@ async function post(url, key, body) {
   return JSON.parse(text);
 }
 
-$("go").onclick = async () => {
+const VISION_MODEL = "qwen/qwen2.5-vl-72b-instruct";
+const VISION_PROMPT = "This is one screenshot of a chat. Extract the visible messages, oldest first, at most 10. Right-aligned or blue/outgoing bubbles are the sender (side me). Left-aligned or gray/incoming bubbles are the other person (side other). Skip timestamps, delivery receipts, and emoji-only reactions. Output only a JSON array of objects {\"side\":\"me\"|\"other\",\"text\":\"...\"}. If no chat is visible, output [].";
+
+async function grabFrame() {
+  if (!navigator.mediaDevices?.getDisplayMedia) {
+    throw new Error("This browser cannot share a window. Use Chrome or Edge.");
+  }
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getDisplayMedia({
+      video: { displaySurface: "window" },
+      audio: false,
+      preferCurrentTab: false,
+      selfBrowserSurface: "exclude",
+    });
+  } catch (e) {
+    if (e?.name === "NotAllowedError") throw new Error("Window share was cancelled.");
+    throw e;
+  }
+  try {
+    const video = document.createElement("video");
+    video.srcObject = stream;
+    video.muted = true;
+    await video.play();
+    if (!video.videoWidth) {
+      await new Promise((resolve) => video.addEventListener("loadeddata", resolve, { once: true }));
+    }
+    const max = 1400;
+    const scale = Math.min(1, max / Math.max(video.videoWidth, video.videoHeight, 1));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(video.videoWidth * scale));
+    canvas.height = Math.max(1, Math.round(video.videoHeight * scale));
+    canvas.getContext("2d").drawImage(video, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL("image/jpeg", 0.72);
+  } finally {
+    stream.getTracks().forEach((t) => t.stop());
+  }
+}
+
+function messagesFromVision(content) {
+  const raw = String(content || "").match(/\[[\s\S]*\]/)?.[0] || "[]";
+  let rows = [];
+  try { rows = JSON.parse(raw); } catch { rows = []; }
+  return rows.map((row) => ({
+    side: String(row.side || row.from || "").toLowerCase() === "me" ? "me" : "other",
+    text: String(row.text || "").trim(),
+  })).filter((m) => m.text).slice(-10);
+}
+
+async function analyzeMessages(messages) {
   const key = $("key").value.trim();
-  const messages = parseChat($("chat").value);
   out.replaceChildren();
   if (!key || !messages.length) { out.append(textCard("Add your OpenRouter key and at least one message.")); return; }
   localStorage.setItem("jev-key", key);
@@ -152,6 +207,35 @@ $("go").onclick = async () => {
       out.append(row);
     }
     out.append(textCard("Copy a reply into the chat yourself. Jev does not send it."));
+  } catch (e) {
+    out.replaceChildren(textCard(String(e.message || e)));
+    out.firstChild.classList.add("err");
+  }
+}
+
+$("go").onclick = () => analyzeMessages(parseChat($("chat").value));
+
+$("share").onclick = async () => {
+  const key = $("key").value.trim();
+  out.replaceChildren();
+  if (!key) { out.append(textCard("Add your OpenRouter key first.")); return; }
+  localStorage.setItem("jev-key", key);
+  out.append(textCard("Pick the chat window in the share dialog…"));
+  try {
+    const frame = await grabFrame();
+    out.replaceChildren(textCard("Reading the window…"));
+    const brain = await loadBrain();
+    const seen = await post(brain.reply_url_default, key, {
+      model: VISION_MODEL,
+      messages: [{ role: "user", content: [
+        { type: "text", text: VISION_PROMPT },
+        { type: "image_url", image_url: { url: frame } },
+      ] }],
+    });
+    const messages = messagesFromVision(seen.choices?.[0]?.message?.content);
+    if (!messages.length) throw new Error("No chat text found. Share the chat window, not the whole desktop.");
+    $("chat").value = messages.map((m) => (m.side === "me" ? "Me: " : "Her: ") + m.text).join("\n");
+    await analyzeMessages(messages);
   } catch (e) {
     out.replaceChildren(textCard(String(e.message || e)));
     out.firstChild.classList.add("err");

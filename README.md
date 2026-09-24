@@ -102,10 +102,16 @@ Open [Jev in the browser](https://xingjianzhang700-arch.github.io/Jev-Assistant/
 
 ## Windows
 
-The Mac screen-recording path is not on Windows. There is no Windows menu-bar app. Instagram on a Windows PC still needs one of these:
+There is no Windows menu-bar app, and the Mac screen recorder does not run there. Windows Chrome can still read a chat without Developer mode:
 
-- **Chrome or Firefox extension.** Follow [Laptop](#laptop). That reads WhatsApp Web, Snapchat Web, Instagram Direct, and Google Messages while the tab is open. Chrome still needs Developer mode to load the unpacked folder.
-- **No install.** Open [Jev in the browser](https://xingjianzhang700-arch.github.io/Jev-Assistant/use.html), paste the chat, and copy a reply back.
+1. Open [Jev in the browser](https://xingjianzhang700-arch.github.io/Jev-Assistant/use.html) in Chrome or Edge.
+2. Paste the OpenRouter key.
+3. Open Instagram, WhatsApp Web, or Snapchat Web in its own window.
+4. Click **Read a window** and choose that chat window in the share picker.
+
+Jev takes one frame, reads the bubbles (right side is you, left side is them), and shows the mood percents and three replies. The picture is not saved. Copy a reply back into the chat yourself.
+
+The [Laptop](#laptop) extension is still there if you want it to watch the tab and fill the message box. Pasting a thread into the same page still works when you would rather not share the window.
 
 ## Android
 
