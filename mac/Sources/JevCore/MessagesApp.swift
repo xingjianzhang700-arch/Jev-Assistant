@@ -34,8 +34,7 @@ public enum MessagesApp {
         guard all.contains(where: isComposer) else { return nil }
         let title = all.first(where: { $0.identifier == "ConversationTitle" })?.text
         if let area = all.first(where: { $0.identifier == "TranscriptCollectionView" }) {
-            let balloons = area.flattened().filter(isBody).sorted { $0.y < $1.y }
-            return Snapshot(title: title, messages: msgsFromBalloons(balloons))
+            return Snapshot(title: title, messages: msgsFromBalloons(balloons(in: area)))
         }
         // Older / fixture layout: bubbles live in AXScrollArea.
         let areas = all.filter { $0.role == "AXScrollArea" }.map { ($0, $0.flattened().filter(isBody)) }
@@ -50,8 +49,31 @@ public enum MessagesApp {
         return Snapshot(title: header, messages: msgs)
     }
 
-    /// Sides come from the outgoing trailing edge (right-aligned = me), not the
-    /// transcript/window width — that frame is often far wider than the chat column.
+    /// The text view is often as wide as the row. The sticker or group behind it
+    /// is the visible bubble, and that is what sits on the right when you sent it.
+    private static func balloons(in area: AXNode) -> [AXNode] {
+        var found: [AXNode] = []
+        func walk(_ n: AXNode, bubble: AXNode?) {
+            if isBody(n) {
+                var copy = n
+                if let frame = bubble {
+                    let rowSized = n.w >= area.w * 0.8 || n.w > frame.w * 1.35 || n.x + 12 < frame.x
+                    if rowSized {
+                        copy.x = frame.x
+                        copy.w = frame.w
+                        copy.y = frame.y
+                    }
+                }
+                found.append(copy)
+            }
+            let next = (n.w > 24 && n.w < area.w * 0.8 && !isBody(n)) ? n : bubble
+            for child in n.children { walk(child, bubble: next) }
+        }
+        walk(area, bubble: nil)
+        return found.sorted { $0.y < $1.y }
+    }
+
+    /// Right-side bubbles are you. The frame is the visible bubble, not the row.
     private static func msgsFromBalloons(_ balloons: [AXNode]) -> [Msg] {
         // Ignore emoji-only / tiny stickers when finding the trailing edge so a
         // centered reaction cannot invent a fake max-right and flip real text.

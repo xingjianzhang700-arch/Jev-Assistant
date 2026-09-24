@@ -17,11 +17,14 @@ public struct ScreenTextBox: Equatable {
 
 /// Pure grouping: OCR boxes → Snapshot. No capture / Vision — safe for JevChecks.
 public func snapshotFromScreenText(_ boxes: [ScreenTextBox], title: String? = nil) -> Snapshot {
-    let kept = boxes.compactMap { b -> ScreenTextBox? in
+    let trimmed = boxes.compactMap { b -> ScreenTextBox? in
         let t = b.text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !t.isEmpty, !looksLikeScreenChrome(t) else { return nil }
+        guard !t.isEmpty else { return nil }
         return ScreenTextBox(text: t, x: b.x, y: b.y, w: b.w, h: b.h)
     }
+    // Instagram's inbox sits left of the open thread. Keep the column above the composer.
+    let thread = focusOpenThread(trimmed)
+    let kept = thread.filter { !looksLikeScreenChrome($0.text) }
     guard !kept.isEmpty else { return Snapshot(title: title, messages: []) }
     let lines = clusterScreenLines(kept)
     let bubbles = clusterScreenBubbles(lines)
@@ -32,15 +35,44 @@ public func snapshotFromScreenText(_ boxes: [ScreenTextBox], title: String? = ni
 public func looksLikeScreenChrome(_ t: String) -> Bool {
     let s = t.lowercased()
     if s == "search" || s == "today" || s == "yesterday" { return true }
+    if s == "messages" || s == "requests" || s == "your note" { return true }
     if s.hasPrefix("delivered") || s.hasPrefix("read") || s.hasPrefix("edited") || s.hasPrefix("seen") {
         return true
     }
+    if s.hasPrefix("you sent") || s.hasPrefix("you:") || s.hasPrefix("active ") { return true }
+    if s.hasPrefix("monday") || s.hasPrefix("tuesday") || s.hasPrefix("wednesday")
+        || s.hasPrefix("thursday") || s.hasPrefix("friday") || s.hasPrefix("saturday")
+        || s.hasPrefix("sunday") { return true }
     if s.hasPrefix("http://") || s.hasPrefix("https://") || s.hasPrefix("www.") { return true }
     if t.contains(".") && !t.contains(" ") && (t.contains("/") || s.contains(".com")) { return true }
     if ["type a message", "message…", "message...", "send a message", "write a message"].contains(s) {
         return true
     }
     return t.range(of: #"^\d{1,2}:\d{2}\s*(am|pm)?$"#, options: [.regularExpression, .caseInsensitive]) != nil
+}
+
+/// The open chat is the column that contains the message box. Inbox rows sit to its left.
+func focusOpenThread(_ boxes: [ScreenTextBox]) -> [ScreenTextBox] {
+    if let composer = boxes.filter({ isComposerLabel($0.text) }).max(by: { $0.y < $1.y }) {
+        return boxes.filter { b in
+            b.y + b.h < composer.y - 4 && (b.x + b.w / 2) >= composer.x - 16
+        }
+    }
+    guard let maxR = boxes.map(\.right).max(), let minL = boxes.map(\.left).min(), maxR - minL > 200 else {
+        return boxes
+    }
+    let split = minL + (maxR - minL) * 0.45
+    let right = boxes.filter { $0.x >= split }
+    let left = boxes.filter { $0.right < split }
+    if right.count >= 1 && left.count >= 4 { return right }
+    return boxes
+}
+
+private func isComposerLabel(_ t: String) -> Bool {
+    let s = t.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+    if s == "message" || s == "message…" || s == "message..." { return true }
+    if s.hasPrefix("message") && s.count <= 16 { return true }
+    return ["type a message", "send a message", "write a message", "imessage"].contains(s)
 }
 
 // MARK: - clustering

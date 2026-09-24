@@ -96,6 +96,10 @@ check(wide?.messages == [Msg("other", "proofs again?"), Msg("me", "yeah toast"),
                          Msg("me", "😂"), Msg("me", "try the demo track"),
                          Msg("me", "I am drilling basics")],
       "wide: trailing-edge me/other; centered emoji inherits me")
+let rowWidth = MessagesApp.parse(load("messages_row_width.json"))
+check(rowWidth?.messages == [Msg("other", "you can retake that"),
+                             Msg("me", "I am teaching myself the intro course")],
+      "row-width text view uses the sticker on the right as me")
 
 let wa = WhatsAppApp.parse(load("whatsapp_window.json"))
 check(wa?.title == "Alex", "whatsapp: title above first message")
@@ -128,6 +132,19 @@ check(snapshotFromScreenText(emojiBoxes).messages == [
     Msg("other", "proofs again?"), Msg("me", "yeah toast"),
     Msg("me", "😂"), Msg("me", "try the demo"),
 ], "screen: centered emoji inherits side, does not flip")
+// Instagram: inbox and the message box sit outside the open thread. Right bubble is you.
+let ig = [
+    ScreenTextBox(text: "Aisha", x: 40, y: 80, w: 80, h: 16),
+    ScreenTextBox(text: "Active 10h ago", x: 40, y: 100, w: 90, h: 12),
+    ScreenTextBox(text: "lol my twitter account is fried", x: 40, y: 200, w: 180, h: 16),
+    ScreenTextBox(text: "When the scores came out he got stricter", x: 420, y: 180, w: 280, h: 36),
+    ScreenTextBox(text: "lol", x: 860, y: 320, w: 36, h: 20),
+    ScreenTextBox(text: "Message...", x: 400, y: 400, w: 200, h: 24),
+]
+check(snapshotFromScreenText(ig).messages == [
+    Msg("other", "When the scores came out he got stricter"),
+    Msg("me", "lol"),
+], "screen: instagram inbox is ignored; right side is me")
 
 print(failures == 0 ? "ALL CHECKS PASSED" : "\(failures) CHECK(S) FAILED")
 exit(failures == 0 ? 0 : 1)

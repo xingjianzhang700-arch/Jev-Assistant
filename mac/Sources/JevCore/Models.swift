@@ -52,23 +52,22 @@ public func sideByEdges(left: Double, right: Double, width: Double) -> String {
     width - right < left ? "me" : "other"
 }
 
-/// Label each balloon from the shared trailing edge of the outgoing column.
+/// Right side of the chat is you. Left side is the other person.
 ///
-/// Live Messages AX uses screen coordinates. Outgoing (blue) balloons share nearly
-/// the same right edge even when a gutter sits between that column and the window's
-/// right edge. Incoming (gray) balloons sit further left and do not share that edge.
-/// Window / transcript width is never used — a centered emoji must not move `maxR`
-/// unless it actually extends past the text column.
+/// A bubble is yours when it hugs the shared right edge (a long outgoing line
+/// still ends on that edge) or its center sits in the right half of the column.
+/// Slack is a few points, not a fraction of the window, so a long incoming
+/// bubble that reaches toward the middle stays theirs.
 public func sidesByBalloonEdges(lefts: [Double], rights: [Double]) -> [String] {
     precondition(lefts.count == rights.count)
     guard let maxR = rights.max(), let minL = lefts.min() else { return [] }
-    // One balloon alone has no trailing cluster to compare — treat as incoming
-    // so Analyze drafts a reply to them rather than to yourself.
     if lefts.count == 1 { return ["other"] }
-    let span = max(maxR - minL, 1)
-    // ~one short bubble of slack; scales up on very wide clouds.
-    let tol = max(28.0, span * 0.1)
-    return rights.map { maxR - $0 <= tol ? "me" : "other" }
+    let mid = (minL + maxR) / 2
+    return zip(lefts, rights).map { left, right in
+        if maxR - right <= 24 { return "me" }
+        let center = (left + right) / 2
+        return center >= mid && left >= mid * 0.5 + minL * 0.5 ? "me" : "other"
+    }
 }
 
 /// Auto-follow / Accessibility path: Messages and WhatsApp Desktop only.

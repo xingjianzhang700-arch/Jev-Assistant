@@ -1,0 +1,10 @@
+{"role": "AXWindow", "x": 0, "y": 0, "w": 1800, "h": 1100, "children": [
+  {"role": "AXButton", "identifier": "ConversationTitle", "value": "Pat", "x": 400, "y": 40, "w": 40, "h": 24},
+  {"role": "AXGroup", "identifier": "TranscriptCollectionView", "x": 0, "y": 80, "w": 1800, "h": 900, "children": [
+    {"role": "AXGroup", "identifier": "Sticker", "x": 36, "y": 120, "w": 260, "h": 36, "children": [
+      {"role": "AXTextArea", "identifier": "CKBalloonTextView", "editable": true, "value": "you can retake that", "x": 0, "y": 120, "w": 1800, "h": 36}]},
+    {"role": "AXGroup", "identifier": "Sticker", "x": 1280, "y": 180, "w": 420, "h": 36, "children": [
+      {"role": "AXTextArea", "identifier": "CKBalloonTextView", "editable": true, "value": "I am teaching myself the intro course", "x": 0, "y": 180, "w": 1800, "h": 36}]}
+  ]},
+  {"role": "AXTextField", "identifier": "messageBodyField", "editable": true, "x": 40, "y": 1000, "w": 1400, "h": 32}
+]}
