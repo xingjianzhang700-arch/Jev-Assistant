@@ -20,11 +20,11 @@ About fifteen seconds, two analyzes. He tries a parking-ticket line. She is not 
 
 - [What Jev does](#what-jev-does)
 - [Connect an OpenRouter API key](#connect-an-openrouter-api-key)
-- [Phone or Windows, no install](#phone-or-windows-no-install)
+- [Phone](#phone)
 - [Windows](#windows)
 - [Android](#android)
-- [Laptop](#laptop)
 - [Mac](#mac)
+- [Windows or Linux](#windows-or-linux)
 - [Supported chats](#supported-chats)
 - [How a suggestion is made](#how-a-suggestion-is-made)
 - [FAQ](#faq)
@@ -34,7 +34,7 @@ About fifteen seconds, two analyzes. He tries a parking-ticket line. She is not 
 ## What Jev does
 
 - **It judges before it writes.** A judgment model names the other person's intent, the risk, and whether to reply now. A second model drafts three replies. The judgment model ranks them.
-- **It only reads the screen.** No hooking, no repackaging, no private APIs, no reading the chat app's database. Android uses the accessibility service. The browser extension reads the page. The Mac app reads Messages or WhatsApp Desktop through Accessibility, and can OCR a front Chrome or Firefox chat window via Screen Recording when you choose Analyze now.
+- **It only reads the screen.** No hooking, no repackaging, no private APIs, no reading the chat app's database. Android uses the accessibility service. On a Mac, the menu-bar app reads Messages and WhatsApp Desktop through Accessibility, and reads a front Chrome or Firefox chat through Screen Recording. A Mac does not use the browser extension. That extension is only for Windows and Linux.
 - **Sending stays yours.** Fill writes the chosen reply into the compose box, or copies it if the box cannot be written. Jev never presses Send.
 - **Your key, your quota.** Judge, reply, and vision can each use a different endpoint. One OpenRouter key is enough: leave the reply and vision keys blank and they reuse the judge key.
 - **Notes stay on the device.** A local knowledge base and contact notes can be included in an analysis. Chat text is sent only to the endpoint you configured, at the moment you analyze.
@@ -49,10 +49,10 @@ Jev does not ship a key. Analysis calls [OpenRouter](https://openrouter.ai/) wit
 
 | Where you use Jev | Where the key goes |
 |---|---|
+| Mac | Menu bar **Jev** → **Set Judge API key…** → Paste → Save. Leave **Set Reply API key** empty to reuse the judge key. No browser extension. |
 | Android | Open the app → Settings → Judge API → paste the key. Leave Reply API and Vision API empty. |
-| Chrome | `chrome://extensions` → Jev Assistant → Details → Extension options. Paste the key into **Judge API key** and save. |
-| Firefox | Extensions → Jev Assistant → Options. Paste the key into **Judge API key** and save. Firefox does not share Chrome's saved key. |
-| Mac | Menu bar **Jev** → **Set Judge API key…** → Paste → Save. Leave **Set Reply API key** empty to reuse the judge key. |
+| Windows or Linux, Chrome extension | `chrome://extensions` → Jev Assistant → Details → Extension options. Paste the key into **Judge API key** and save. |
+| Windows or Linux, Firefox extension | Extensions → Jev Assistant → Options. Paste the key into **Judge API key** and save. Firefox does not share Chrome's saved key. |
 
 <p align="center">
   <img src="docs/images/mac-judge-key.png" width="420" alt="Mac dialog: paste the OpenRouter Judge API key, then Save" /><br/>
@@ -68,9 +68,9 @@ Jev does not ship a key. Analysis calls [OpenRouter](https://openrouter.ai/) wit
 
 | Where you use Jev | Where the relationship goes |
 |---|---|
-| Android | Settings → relationship / contact notes for that person. |
-| Chrome / Firefox | Extension options → **Who is the other person to you?** |
 | Mac | Menu bar **Jev** → **Set relationship…** |
+| Android | Settings → relationship / contact notes for that person. |
+| Windows or Linux extension | Extension options → **Who is the other person to you?** |
 | Browser paste page | The **Who is the other person to you?** field on [docs/use.html](docs/use.html). |
 
 <p align="center">
@@ -94,24 +94,24 @@ The default judge and reply models are paid OpenRouter models. To spend less, ch
 
 The panel lists up to three **mood** possibilities, highest first, each with a percent — for example `Angry 70%`, `Furious 20%`, `Frustrated 10%` on separate spaced items, not one clutched string. That percent is the model's probability for that mood, judged from the messages with the latest line weighted most.
 
-## Phone or Windows, no install
+## Phone
 
-iPhone cannot let an app read WhatsApp, Snapchat, or Messages. Chrome on Android cannot load this extension either. The page below works in the phone's browser and in any Windows browser: paste the chat, get the mood percent and three replies, copy one back.
-
-Open [Jev in the browser](https://xingjianzhang700-arch.github.io/Jev-Assistant/use.html). On a phone, copy the thread out of the chat app first. Lines look like `Me:` and `Her:`. The OpenRouter key stays in that browser. Jev still does not send. The page source is [docs/use.html](docs/use.html).
+iPhone cannot let an app read WhatsApp, Snapchat, or Messages. Chrome on Android cannot load this extension either. On a phone, open [Jev in the browser](https://xingjianzhang700-arch.github.io/Jev-Assistant/use.html), copy the thread out of the chat app, and copy a reply back. Lines look like `Me:` and `Her:`. The OpenRouter key stays in that browser. Jev still does not send. The page source is [docs/use.html](docs/use.html).
 
 ## Windows
 
-There is no Windows menu-bar app, and the Mac screen recorder does not run there. Windows Chrome can still read a chat without Developer mode:
+There is no Windows menu-bar app. Chrome and Edge can still read the open chat without Developer mode and without pasting the thread.
 
-1. Open [Jev in the browser](https://xingjianzhang700-arch.github.io/Jev-Assistant/use.html) in Chrome or Edge.
-2. Paste the OpenRouter key.
-3. Open Instagram, WhatsApp Web, or Snapchat Web in its own window.
-4. Click **Read a window** and choose that chat window in the share picker.
+1. Open [Jev in the browser](https://xingjianzhang700-arch.github.io/Jev-Assistant/use.html) and save the OpenRouter key.
+2. Drag the **Jev** link on that page onto the bookmarks bar.
+3. Open the chat on Instagram, WhatsApp Web, Snapchat Web, or Google Messages.
+4. Click the **Jev** bookmark.
 
-Jev takes one frame, reads the bubbles (right side is you, left side is them), and shows the mood percents and three replies. The picture is not saved. Copy a reply back into the chat yourself.
+Jev reads the messages in that tab. Bubbles on the right are you. The inbox beside the chat is not included. A Jev tab opens with the mood percents and three replies. Copy one back. Jev does not send it.
 
-The [Laptop](#laptop) extension is still there if you want it to watch the tab and fill the message box. Pasting a thread into the same page still works when you would rather not share the window.
+**Read a window** on the same page is the other path. The share picker takes one frame of any chat window, including apps outside those four sites. The picture is not saved.
+
+The [browser extension](#windows-or-linux) can still watch the tab and fill the message box if you want that. A Mac does not need the bookmark or the extension.
 
 ## Android
 
@@ -136,9 +136,11 @@ That APK is the older v1.3 build. It does not include mood, or the later WhatsAp
 
 The debug APK is written to `app/build/outputs/apk/debug/app-debug.apk`.
 
-## Laptop
+## Windows or Linux
 
-The extension is the same folder for Chrome and Firefox. It reads WhatsApp Web, Snapchat Web, Instagram Direct, and Google Messages for web.
+On a Mac, skip this section. The menu-bar app reads the chat. You do not install a Chrome or Firefox extension.
+
+This extension is for Windows and Linux. It is the same folder for Chrome and Firefox. It reads WhatsApp Web, Snapchat Web, Instagram Direct, and Google Messages for web.
 
 **Chrome.** Open `chrome://extensions`, turn on Developer mode, choose **Load unpacked**, and select the `extension/` folder. Click the Jev toolbar icon to open the side panel.
 
@@ -162,7 +164,9 @@ An iPhone cannot let an app read WhatsApp or Snapchat. On a computer, use WhatsA
 
 ## Mac
 
-The menu-bar app reads Apple Messages (iMessage, and SMS forwarded from an iPhone) and WhatsApp Desktop through Accessibility. For WhatsApp Web, Instagram Direct, Snapchat Web, or Google Messages in a normal Chrome or Firefox window, bring that window to the front and choose **Analyze now** — Jev takes one Screen Recording still, OCRs it, and runs the same analyze pipeline (no Chrome Developer mode or unpacked extension required). The [Laptop](#laptop) extension remains an optional DOM path if you prefer it.
+The menu-bar app is the whole Mac install. Do not load the Chrome or Firefox extension.
+
+It reads Apple Messages (iMessage, and SMS forwarded from an iPhone) and WhatsApp Desktop through Accessibility. For WhatsApp Web, Instagram Direct, Snapchat Web, or Google Messages, leave that browser window in front and choose **Analyze now**. Jev takes one Screen Recording still, reads the bubbles, and runs the same analyze pipeline.
 
 Requirements: macOS 14 or newer, Messages signed in, and SMS forwarding turned on if you want SMS threads.
 
@@ -187,10 +191,10 @@ The menu bar auto-follows Messages and WhatsApp Desktop only. Browser chats are 
 
 | Chat | Where | How it is read |
 |---|---|---|
-| WhatsApp | Android app, WhatsApp Desktop, WhatsApp Web | Accessibility on Android and Mac. Screen Recording OCR on Mac for Web. The page DOM in Chrome and Firefox. |
-| Snapchat | Android app, Snapchat Web | Accessibility on Android. Screen Recording OCR on Mac. The page DOM in the browser. |
-| Instagram | Android app, instagram.com Direct | Accessibility on Android. Screen Recording OCR on Mac. The page DOM in the browser. |
-| SMS / iMessage | Google Messages, Apple Messages | Accessibility on Android and Mac. Screen Recording OCR on Mac for Google Messages web. Google Messages for web in the browser. |
+| WhatsApp | Android app, WhatsApp Desktop, WhatsApp Web | Accessibility on Android and on the Mac app. Screen Recording on Mac for WhatsApp Web. On Windows or Linux, the browser extension reads the page. |
+| Snapchat | Android app, Snapchat Web | Accessibility on Android. Screen Recording on Mac. On Windows or Linux, the browser extension reads the page. |
+| Instagram | Android app, instagram.com Direct | Accessibility on Android. Screen Recording on Mac. On Windows or Linux, the browser extension reads the page. |
+| SMS / iMessage | Google Messages, Apple Messages | Accessibility on Android and on the Mac app for Messages. Screen Recording on Mac for Google Messages on the web. On Windows or Linux, the browser extension reads Google Messages. |
 | QQ, X, Feishu | Android | Accessibility. Feishu falls back to on-device OCR when the message text is drawn rather than exposed. |
 | Any other app | Android | Overlay menu **Read screen once**. Manual. It does not separate you from the other person. |
 
@@ -239,6 +243,13 @@ No. It does not modify the chat app and it does not inject into its process.
 <summary><b>Where does the chat text go?</b></summary>
 
 Only to the API endpoint you saved, and only when you run an analysis. Jev has no server of its own. Local history is off until you turn it on, and then it stays in the app's private storage.
+
+</details>
+
+<details>
+<summary><b>Does a Mac need the Chrome extension?</b></summary>
+
+No. Install the menu-bar app, grant Accessibility and Screen Recording, and set the Judge API key from the Jev menu. Chrome and Firefox on a Mac are just the windows Jev reads. The extension is for Windows and Linux.
 
 </details>
 

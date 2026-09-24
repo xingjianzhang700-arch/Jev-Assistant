@@ -26,12 +26,14 @@
     .reply { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
     .reply button { width: auto; margin: 0; padding: 8px 12px; }
     .err { color: #f0a8a8; }
+    #bookmark { color: #3ee0d2; font-weight: 700; }
   </style>
 </head>
 <body>
 <main>
   <h1><span class="cyan">Jev</span> Assistant</h1>
-  <p class="lead">On Windows, share the chat window. Jev reads it once, scores her mood, and suggests three replies. Nothing is sent.</p>
+  <p class="lead">Click the Jev bookmark on an open chat. Jev reads that thread, scores mood, and suggests three replies. Nothing is sent.</p>
+  <p class="hint">Drag <a id="bookmark" href="#">Jev</a> to the bookmarks bar once. Then open Instagram, WhatsApp Web, Snapchat Web, or Google Messages and click that bookmark. Bubbles on the right are you.</p>
   <label for="key">OpenRouter API key</label>
   <input id="key" type="password" autocomplete="off" placeholder="sk-or-v1-…">
   <p class="hint">Saved only in this browser. Create one at openrouter.ai/keys and set a spending cap.</p>
@@ -53,6 +55,27 @@ const $ = (id) => document.getElementById(id);
 const out = $("out");
 $("key").value = localStorage.getItem("jev-key") || "";
 $("relationship").value = localStorage.getItem("jev-relationship") || "";
+
+fetch(new URL("jev-read.js", import.meta.url)).then((r) => r.text()).then((code) => {
+  const href = "javascript:" + encodeURIComponent(code);
+  const link = $("bookmark");
+  link.href = href;
+  link.draggable = true;
+  link.addEventListener("click", (e) => e.preventDefault());
+}).catch(() => {});
+
+function loadSharedChat() {
+  if (!location.hash.startsWith("#j=")) return;
+  let data = null;
+  try { data = JSON.parse(decodeURIComponent(location.hash.slice(3))); } catch { data = null; }
+  history.replaceState(null, "", location.pathname + location.search);
+  const messages = Array.isArray(data?.messages) ? data.messages.slice(-10) : [];
+  if (!messages.length) return;
+  $("chat").value = messages.map((m) => ((m.side === "me") ? "Me: " : "Her: ") + m.text).join("\n");
+  const parsed = messages.map((m) => ({ side: m.side === "me" ? "me" : "other", text: String(m.text || "").trim() })).filter((m) => m.text);
+  if ($("key").value.trim()) analyzeMessages(parsed);
+  else out.append(textCard("Chat loaded from the bookmark. Add your OpenRouter key, then Analyze."));
+}
 
 function parseChat(raw) {
   const msgs = [];
@@ -214,6 +237,7 @@ async function analyzeMessages(messages) {
 }
 
 $("go").onclick = () => analyzeMessages(parseChat($("chat").value));
+loadSharedChat();
 
 $("share").onclick = async () => {
   const key = $("key").value.trim();
