@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import CoreGraphics
 import JevCore
 
 @MainActor
@@ -8,6 +9,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let panel = ReplyPanel()
     private var timer: Timer?
     private var lastSig = ""
+    private var lastFront = ""
     private var current: Snapshot?
     private var busy = false
     private var generation = 0
@@ -99,14 +101,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
         let front = NSWorkspace.shared.frontmostApplication?.bundleIdentifier ?? "-"
+        defer { lastFront = front }
         guard let w = AXReader.chatWindow() else {
             writeStatus("trusted=1 frontmost=\(front) parsed=no-chat-window")
-            if keepChat(current, frontmost: front) == nil && (current != nil || busy) {
+            // Clear only when leaving Messages/WhatsApp — not on every browser tick
+            // (screen-capture Analyze stores a Snapshot while Chrome/Firefox stays front).
+            if macChatReads(lastFront) && !macChatReads(front) && (current != nil || busy) {
                 dropChat()
                 panel.show(title: "Paused")
-                panel.status(front.contains("firefox")
-                    ? "Not reading this window. Instagram in Firefox isn't supported — use the Chrome extension, or bring Messages / WhatsApp Desktop to the front."
-                    : "Not reading this window. The menu bar only follows Messages and WhatsApp Desktop.")
+                panel.status("Auto-analyze only follows Messages and WhatsApp Desktop. For Chrome or Firefox, choose Analyze now (screen capture).")
             }
             return
         }
@@ -140,31 +143,66 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func analyzeNow() {
-        if !AXIsProcessTrusted() {
-            panel.show(title: "Setup")
-            panel.status("macOS has not allowed Jev to read Messages. System Settings → Privacy & Security → Accessibility → turn on Jev Assistant.")
-            return
-        }
         let front = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
-        if !macChatReads(front) {
-            panel.show(title: "Paused")
-            panel.status("Bring Messages or WhatsApp Desktop to the front. Instagram is the Chrome extension, not Firefox.")
+        if macChatReads(front) {
+            if !AXIsProcessTrusted() {
+                panel.show(title: "Setup")
+                panel.status("macOS has not allowed Jev to read Messages. System Settings → Privacy & Security → Accessibility → turn on Jev Assistant.")
+                return
+            }
+            guard let s = current, !s.messages.isEmpty else {
+                panel.show(title: "Setup")
+                panel.status("No readable conversation yet. Click a thread in Messages or WhatsApp Desktop, leave that window in front, wait 2 seconds, then Analyze now.")
+                return
+            }
+            analyze(s)
             return
         }
-        guard let s = current, !s.messages.isEmpty else {
+        // Browser / other apps: one ScreenCaptureKit still + Vision OCR (no extension).
+        if !ScreenCapture.ensureAccess() {
             panel.show(title: "Setup")
-            panel.status("No readable conversation yet. Click a thread in Messages or WhatsApp Desktop, leave that window in front, wait 2 seconds, then Analyze now.")
+            panel.status("Enable Jev Assistant under System Settings → Privacy & Security → Screen Recording, then Analyze now again.")
             return
         }
-        analyze(s)
+        guard !busy else { return }
+        panel.show(title: "Capture")
+        panel.status("Capturing front window…")
+        let gen = generation
+        work?.cancel()
+        work = nil
+        busy = true
+        // Not stored in `work` — analyze() would cancel this task and its defer would clear busy.
+        Task {
+            do {
+                let snap = try await ScreenCapture.snapshotFrontWindow()
+                guard gen == generation else { return }
+                guard !snap.messages.isEmpty else {
+                    busy = false
+                    panel.show(title: "Setup")
+                    panel.status("Couldn't read chat text from this window. Bring a WhatsApp / Instagram / Snapchat / Messages web chat to the front, then Analyze now.")
+                    return
+                }
+                current = snap
+                lastSig = snap.signature
+                panel.show(title: snap.title ?? "Chat")
+                busy = false
+                analyze(snap)
+            } catch {
+                guard gen == generation else { return }
+                busy = false
+                panel.show(title: "Setup")
+                panel.status(error.localizedDescription)
+            }
+        }
     }
 
     @objc private func explainSetup() {
         let trusted = AXIsProcessTrusted()
+        let screen = CGPreflightScreenCaptureAccess()
         let front = NSWorkspace.shared.frontmostApplication?.bundleIdentifier ?? "none"
         let n = current?.messages.count ?? 0
         panel.show(title: "Setup")
-        panel.status("Accessibility \(trusted ? "on" : "OFF"). Front app \(front). Stored conversation \(n) messages. If Accessibility is off, enable Jev Assistant there and click a thread.")
+        panel.status("Accessibility \(trusted ? "on" : "OFF"). Screen Recording \(screen ? "on" : "OFF"). Front app \(front). Stored conversation \(n) messages. Messages/WhatsApp need Accessibility; Chrome/Firefox need Screen Recording + Analyze now.")
     }
 
     private func analyze(_ s: Snapshot) {

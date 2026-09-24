@@ -103,5 +103,31 @@ check(wa?.messages == [Msg("other", "are we still on for tonight?"), Msg("me", "
                        Msg("other", "perfect, see you there")], "whatsapp: in/out sides")
 check(WhatsAppApp.parse(load("whatsapp_no_convo.json")) == nil, "whatsapp: no conversation -> nil")
 
+// Screen OCR grouping (fake boxes only — no capture, no real DMs)
+check(looksLikeScreenChrome("9:41 AM") && looksLikeScreenChrome("Delivered")
+        && looksLikeScreenChrome("https://web.whatsapp.com"), "screen chrome clocks/receipts/urls")
+check(!looksLikeScreenChrome("see you at 7"), "screen chrome keeps real lines")
+let screenBoxes = [
+    ScreenTextBox(text: "hey there", x: 40, y: 100, w: 120, h: 20),
+    ScreenTextBox(text: "9:41 AM", x: 160, y: 40, w: 50, h: 12),
+    ScreenTextBox(text: "hi!", x: 280, y: 140, w: 40, h: 20),
+    ScreenTextBox(text: "Delivered", x: 280, y: 162, w: 55, h: 10),
+    ScreenTextBox(text: "free later?", x: 40, y: 180, w: 100, h: 20),
+]
+let screenSnap = snapshotFromScreenText(screenBoxes)
+check(screenSnap.messages == [Msg("other", "hey there"), Msg("me", "hi!"), Msg("other", "free later?")],
+      "screen: lines → bubbles with trailing-edge sides")
+// Centered emoji must not redefine the outgoing column.
+let emojiBoxes = [
+    ScreenTextBox(text: "proofs again?", x: 48, y: 100, w: 180, h: 20),
+    ScreenTextBox(text: "yeah toast", x: 288, y: 140, w: 140, h: 20),
+    ScreenTextBox(text: "😂", x: 200, y: 175, w: 28, h: 28),
+    ScreenTextBox(text: "try the demo", x: 268, y: 220, w: 160, h: 20),
+]
+check(snapshotFromScreenText(emojiBoxes).messages == [
+    Msg("other", "proofs again?"), Msg("me", "yeah toast"),
+    Msg("me", "😂"), Msg("me", "try the demo"),
+], "screen: centered emoji inherits side, does not flip")
+
 print(failures == 0 ? "ALL CHECKS PASSED" : "\(failures) CHECK(S) FAILED")
 exit(failures == 0 ? 0 : 1)

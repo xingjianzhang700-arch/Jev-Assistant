@@ -19,6 +19,8 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
   <key>CFBundleShortVersionString</key><string>1.4</string>
   <key>LSMinimumSystemVersion</key><string>14.0</string>
   <key>LSUIElement</key><true/>
+  <key>NSScreenCaptureUsageDescription</key>
+  <string>Jev captures the front chat window once when you choose Analyze now, so it can read WhatsApp Web, Instagram, Snapchat Web, or Google Messages without a browser extension.</string>
 </dict></plist>
 PLIST
 codesign --force --sign - "$APP"

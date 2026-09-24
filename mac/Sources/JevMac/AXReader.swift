@@ -13,7 +13,7 @@ enum AXReader {
         return AXUIElementCopyAttributeValue(e, name as CFString, &v) == .success ? v : nil
     }
 
-    /// Messages or WhatsApp, whichever is in front. Instagram is the Chrome extension.
+    /// Messages or WhatsApp Desktop, whichever is in front (Accessibility path).
     static func chatWindow() -> AXUIElement? {
         guard let front = NSWorkspace.shared.frontmostApplication,
               macChatReads(front.bundleIdentifier) else { return nil }

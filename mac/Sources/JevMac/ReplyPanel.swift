@@ -136,10 +136,6 @@ final class ReplyPanel {
     private func measure(_ v: NSView, width: CGFloat) -> CGFloat {
         if let card = v as? ReplyCard { return card.measure(width: width) }
         if let strip = v as? MoodStrip { return strip.measure(width: width) }
-        if let stack = v as? NSStackView {
-            stack.frame.size.width = width
-            return max(ceil(stack.fittingSize.height), 16)
-        }
         if let l = v as? NSTextField {
             l.preferredMaxLayoutWidth = width
             return max(ceil(l.intrinsicContentSize.height), 16)

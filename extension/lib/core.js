@@ -80,13 +80,6 @@ export function rankReplies(bestReply, candidates) {
     .sort((x, y) => y.prob - x.prob);
 }
 
-export function moodPercent(answer) {
-  if (!answer?.choice) return null;
-  const raw = answer.probabilities?.[answer.choice] ?? answer.confidence;
-  const n = Number(raw);
-  return Number.isFinite(n) ? Math.round(n * 100) : null;
-}
-
 /** Top moods by probability (highest first). Falls back to choice+confidence if no map. */
 export function topMoods(answer, limit = 3) {
   if (!answer) return [];

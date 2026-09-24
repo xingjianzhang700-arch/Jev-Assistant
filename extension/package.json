@@ -2,6 +2,6 @@
   "name": "jev-assistant-extension",
   "private": true,
   "type": "module",
-  "scripts": { "test": "node --test" },
+  "scripts": { "test": "node --test test/*.test.js" },
   "devDependencies": { "linkedom": "^0.18.0" }
 }

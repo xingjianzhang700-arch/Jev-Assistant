@@ -34,7 +34,7 @@ About fifteen seconds, two analyzes. He tries a parking-ticket line. She is not 
 ## What Jev does
 
 - **It judges before it writes.** A judgment model names the other person's intent, the risk, and whether to reply now. A second model drafts three replies. The judgment model ranks them.
-- **It only reads the screen.** No hooking, no repackaging, no private APIs, no reading the chat app's database. Android uses the accessibility service. The browser extension reads the page. The Mac app reads Messages or WhatsApp Desktop through Accessibility.
+- **It only reads the screen.** No hooking, no repackaging, no private APIs, no reading the chat app's database. Android uses the accessibility service. The browser extension reads the page. The Mac app reads Messages or WhatsApp Desktop through Accessibility, and can OCR a front Chrome or Firefox chat window via Screen Recording when you choose Analyze now.
 - **Sending stays yours.** Fill writes the chosen reply into the compose box, or copies it if the box cannot be written. Jev never presses Send.
 - **Your key, your quota.** Judge, reply, and vision can each use a different endpoint. One OpenRouter key is enough: leave the reply and vision keys blank and they reuse the judge key.
 - **Notes stay on the device.** A local knowledge base and contact notes can be included in an analysis. Chat text is sent only to the endpoint you configured, at the moment you analyze.
@@ -102,9 +102,10 @@ Open [Jev in the browser](https://xingjianzhang700-arch.github.io/Jev-Assistant/
 
 ## Windows
 
-Windows uses the same browser extension as a Mac laptop. Install Chrome or Firefox, then follow [Laptop](#laptop). The extension reads WhatsApp Web, Snapchat Web, Instagram Direct, and Google Messages while that tab is open.
+The Mac screen-recording path is not on Windows. There is no Windows menu-bar app. Instagram on a Windows PC still needs one of these:
 
-If you do not want to install an extension, use [Jev in the browser](https://xingjianzhang700-arch.github.io/Jev-Assistant/use.html) and paste the chat.
+- **Chrome or Firefox extension.** Follow [Laptop](#laptop). That reads WhatsApp Web, Snapchat Web, Instagram Direct, and Google Messages while the tab is open. Chrome still needs Developer mode to load the unpacked folder.
+- **No install.** Open [Jev in the browser](https://xingjianzhang700-arch.github.io/Jev-Assistant/use.html), paste the chat, and copy a reply back.
 
 ## Android
 
@@ -155,7 +156,7 @@ An iPhone cannot let an app read WhatsApp or Snapchat. On a computer, use WhatsA
 
 ## Mac
 
-The menu-bar app reads Apple Messages (iMessage, and SMS forwarded from an iPhone) and WhatsApp Desktop. Snapchat on a Mac is the browser extension. There is no Snapchat Mac app.
+The menu-bar app reads Apple Messages (iMessage, and SMS forwarded from an iPhone) and WhatsApp Desktop through Accessibility. For WhatsApp Web, Instagram Direct, Snapchat Web, or Google Messages in a normal Chrome or Firefox window, bring that window to the front and choose **Analyze now** — Jev takes one Screen Recording still, OCRs it, and runs the same analyze pipeline (no Chrome Developer mode or unpacked extension required). The [Laptop](#laptop) extension remains an optional DOM path if you prefer it.
 
 Requirements: macOS 14 or newer, Messages signed in, and SMS forwarding turned on if you want SMS threads.
 
@@ -163,16 +164,16 @@ Requirements: macOS 14 or newer, Messages signed in, and SMS forwarding turned o
 bash mac/package.sh
 ```
 
-Open `mac/build/Jev Assistant.app`. A **Jev** item appears in the menu bar. Grant Accessibility under System Settings → Privacy & Security → Accessibility, then set the Judge API key from the Jev menu. Each rebuild changes the ad-hoc signature, so macOS may ask for Accessibility again.
+Open `mac/build/Jev Assistant.app`. A **Jev** item appears in the menu bar. Grant **Accessibility** (Messages / WhatsApp Desktop) and **Screen Recording** (browser Analyze) under System Settings → Privacy & Security, then set the Judge API key from the Jev menu. Each rebuild changes the ad-hoc signature, so macOS may ask for Accessibility and Screen Recording again.
 
 <p align="center">
   <img src="docs/images/mac-app-build.png" width="480" alt="Build Jev Assistant.app with bash mac/package.sh, then open mac/build/Jev Assistant.app" /><br/>
   <em>Mac install path: <code>bash mac/package.sh</code> → open <code>mac/build/Jev Assistant.app</code></em>
 </p>
 
-Describe your relationship with that person under **Jev → Set relationship…** (see the screenshots in [Connect an OpenRouter API key](#connect-an-openrouter-api-key)). Then bring Messages or WhatsApp Desktop to the front and choose **Analyze now**.
+Describe your relationship with that person under **Jev → Set relationship…** (see the screenshots in [Connect an OpenRouter API key](#connect-an-openrouter-api-key)). Then bring Messages, WhatsApp Desktop, or a browser chat to the front and choose **Analyze now**.
 
-The menu bar follows Messages and WhatsApp Desktop only. Switching to another app stops the current analysis. Instagram is the browser extension.
+The menu bar auto-follows Messages and WhatsApp Desktop only. Browser chats are read when you choose **Analyze now** (screen capture).
 
 **Fill** writes the compose field, or copies the text if the field cannot be set. It does not press Return.
 
@@ -180,10 +181,10 @@ The menu bar follows Messages and WhatsApp Desktop only. Switching to another ap
 
 | Chat | Where | How it is read |
 |---|---|---|
-| WhatsApp | Android app, WhatsApp Desktop, WhatsApp Web | Accessibility on Android and Mac. The page DOM in Chrome and Firefox. |
-| Snapchat | Android app, Snapchat Web | Accessibility on Android. The page DOM in the browser. |
-| Instagram | Android app, instagram.com Direct | Accessibility on Android. The page DOM in the browser. |
-| SMS / iMessage | Google Messages, Apple Messages | Accessibility on Android and Mac. Google Messages for web in the browser. |
+| WhatsApp | Android app, WhatsApp Desktop, WhatsApp Web | Accessibility on Android and Mac. Screen Recording OCR on Mac for Web. The page DOM in Chrome and Firefox. |
+| Snapchat | Android app, Snapchat Web | Accessibility on Android. Screen Recording OCR on Mac. The page DOM in the browser. |
+| Instagram | Android app, instagram.com Direct | Accessibility on Android. Screen Recording OCR on Mac. The page DOM in the browser. |
+| SMS / iMessage | Google Messages, Apple Messages | Accessibility on Android and Mac. Screen Recording OCR on Mac for Google Messages web. Google Messages for web in the browser. |
 | QQ, X, Feishu | Android | Accessibility. Feishu falls back to on-device OCR when the message text is drawn rather than exposed. |
 | Any other app | Android | Overlay menu **Read screen once**. Manual. It does not separate you from the other person. |
 

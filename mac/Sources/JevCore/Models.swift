@@ -71,13 +71,14 @@ public func sidesByBalloonEdges(lefts: [Double], rights: [Double]) -> [String] {
     return rights.map { maxR - $0 <= tol ? "me" : "other" }
 }
 
-/// Menu-bar Jev only reads these apps. Instagram / Snapchat are the Chrome extension.
+/// Auto-follow / Accessibility path: Messages and WhatsApp Desktop only.
+/// Browsers use Analyze now → screen capture (see ScreenChat / ScreenCapture).
 public func macChatReads(_ bundle: String?) -> Bool {
     guard let bundle else { return false }
     return bundle == MessagesApp.bundleID || WhatsAppApp.bundleIDs.contains(bundle)
 }
 
-/// Drop the stored thread once the user leaves Messages / WhatsApp Desktop.
+/// Drop the Accessibility-stored thread once the user leaves Messages / WhatsApp Desktop.
 public func keepChat(_ snap: Snapshot?, frontmost: String?) -> Snapshot? {
     macChatReads(frontmost) ? snap : nil
 }
