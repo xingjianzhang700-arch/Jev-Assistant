@@ -1,5 +1,5 @@
 (function () {
-  var PAGE = "https://xingjianzhang700-arch.github.io/Jev-Assistant/use.html#j=";
+  var PAGE = "https://zandy700.github.io/Jev-Assistant/use.html#j=";
   function side(left, right, width) {
     return width - right < left ? "me" : "other";
   }

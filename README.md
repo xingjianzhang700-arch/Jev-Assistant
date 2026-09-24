@@ -96,13 +96,13 @@ The panel lists up to three **mood** possibilities, highest first, each with a p
 
 ## Phone
 
-iPhone cannot let an app read WhatsApp, Snapchat, or Messages. Chrome on Android cannot load this extension either. On a phone, open [Jev in the browser](https://xingjianzhang700-arch.github.io/Jev-Assistant/use.html), copy the thread out of the chat app, and copy a reply back. Lines look like `Me:` and `Her:`. The OpenRouter key stays in that browser. Jev still does not send. The page source is [docs/use.html](docs/use.html).
+iPhone cannot let an app read WhatsApp, Snapchat, or Messages. Chrome on Android cannot load this extension either. On a phone, open [Jev in the browser](https://zandy700.github.io/Jev-Assistant/use.html), copy the thread out of the chat app, and copy a reply back. Lines look like `Me:` and `Her:`. The OpenRouter key stays in that browser. Jev still does not send. The page source is [docs/use.html](docs/use.html).
 
 ## Windows
 
 There is no Windows menu-bar app. Chrome and Edge can still read the open chat without Developer mode and without pasting the thread.
 
-1. Open [Jev in the browser](https://xingjianzhang700-arch.github.io/Jev-Assistant/use.html) and save the OpenRouter key.
+1. Open [Jev in the browser](https://zandy700.github.io/Jev-Assistant/use.html) and save the OpenRouter key.
 2. Drag the **Jev** link on that page onto the bookmarks bar.
 3. Open the chat on Instagram, WhatsApp Web, Snapchat Web, or Google Messages.
 4. Click the **Jev** bookmark.
